@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - backend_deps:/app/.venv
+    environment:
+      - DATABASE_URL=sqlite:///./k12.db
+      - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8000/api
+    command: npm run dev
+
+  db:
+    image: sqlite:latest
+    volumes:
+      - ./db:/data
+    command: echo "SQLite database will be created by the backend"
+
+volumes:
+  backend_deps:
