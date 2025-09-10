@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..db.session import get_db
 from ..db.models import User, Question
 from ..schemas.grading import GradeRequest, GradeResponse, BatchGradeRequest, BatchGradeResponse
-from .auth import get_current_user_simple
+from ..core.security import get_current_user
 
 router = APIRouter()
 
@@ -11,11 +11,11 @@ router = APIRouter()
 @router.post("/short-answer", response_model=GradeResponse)
 async def grade_short_answer(
     request: GradeRequest,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Grade a short answer question using AI."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can grade assignments")
     
     # Get the question
@@ -40,11 +40,11 @@ async def grade_short_answer(
 @router.post("/batch", response_model=BatchGradeResponse)
 async def batch_grade(
     request: BatchGradeRequest,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Grade multiple responses in batch."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can grade assignments")
     
     results = []

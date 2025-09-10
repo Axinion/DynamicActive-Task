@@ -4,7 +4,7 @@ from typing import List
 from ..db.session import get_db
 from ..db.models import User, Lesson, Class, Enrollment
 from ..schemas.recommendations import RecommendationResponse, LessonRecommendation
-from .auth import get_current_user_simple
+from ..core.security import get_current_user
 
 router = APIRouter()
 
@@ -12,18 +12,18 @@ router = APIRouter()
 @router.get("/", response_model=RecommendationResponse)
 async def get_recommendations(
     student_id: int = Query(None),
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get AI-powered lesson recommendations for a student."""
     # For teachers, they can specify a student_id
     # For students, they can only get their own recommendations
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         if not student_id:
             raise HTTPException(status_code=400, detail="student_id required for teachers")
         target_student_id = student_id
     else:
-        target_student_id = current_user.id
+        target_student_id = current_user["id"]
     
     # Get student's enrolled classes
     enrollments = db.query(Enrollment).filter(Enrollment.user_id == target_student_id).all()
@@ -72,15 +72,15 @@ async def get_recommendations(
 
 @router.get("/lessons", response_model=List[LessonRecommendation])
 async def get_lesson_recommendations(
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get lesson recommendations for current user (simplified endpoint)."""
-    if current_user.role != "student":
+    if current_user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can get lesson recommendations")
     
     # Get student's enrolled classes
-    enrollments = db.query(Enrollment).filter(Enrollment.user_id == current_user.id).all()
+    enrollments = db.query(Enrollment).filter(Enrollment.user_id == current_user["id"]).all()
     class_ids = [enrollment.class_id for enrollment in enrollments]
     
     if not class_ids:

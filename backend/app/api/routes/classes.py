@@ -6,7 +6,7 @@ import string
 from ..db.session import get_db
 from ..db.models import User, Class, Enrollment
 from ..schemas.classes import ClassCreate, ClassResponse, ClassWithDetails, JoinClassRequest, JoinClassResponse
-from .auth import get_current_user_simple
+from ..core.security import get_current_user
 
 router = APIRouter()
 
@@ -14,11 +14,11 @@ router = APIRouter()
 @router.post("/", response_model=ClassResponse)
 async def create_class(
     class_data: ClassCreate,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new class (teacher only)."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create classes")
     
     # Generate unique invite code
@@ -30,7 +30,7 @@ async def create_class(
     
     new_class = Class(
         name=class_data.name,
-        teacher_id=current_user.id,
+        teacher_id=current_user["id"],
         invite_code=invite_code
     )
     
@@ -43,13 +43,13 @@ async def create_class(
 
 @router.get("/", response_model=List[ClassWithDetails])
 async def get_classes(
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get classes for current user."""
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         # Get classes taught by teacher
-        classes = db.query(Class).filter(Class.teacher_id == current_user.id).all()
+        classes = db.query(Class).filter(Class.teacher_id == current_user["id"]).all()
         result = []
         for cls in classes:
             student_count = db.query(Enrollment).filter(Enrollment.class_id == cls.id).count()
@@ -61,7 +61,7 @@ async def get_classes(
         return result
     else:
         # Get classes student is enrolled in
-        enrollments = db.query(Enrollment).filter(Enrollment.user_id == current_user.id).all()
+        enrollments = db.query(Enrollment).filter(Enrollment.user_id == current_user["id"]).all()
         result = []
         for enrollment in enrollments:
             cls = db.query(Class).filter(Class.id == enrollment.class_id).first()
@@ -78,11 +78,11 @@ async def get_classes(
 @router.post("/join", response_model=JoinClassResponse)
 async def join_class(
     request: JoinClassRequest,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Join a class using invite code (student only)."""
-    if current_user.role != "student":
+    if current_user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can join classes")
     
     # Find class by invite code
@@ -96,7 +96,7 @@ async def join_class(
     
     # Check if already enrolled
     existing_enrollment = db.query(Enrollment).filter(
-        Enrollment.user_id == current_user.id,
+        Enrollment.user_id == current_user["id"],
         Enrollment.class_id == class_to_join.id
     ).first()
     
@@ -108,7 +108,7 @@ async def join_class(
     
     # Create enrollment
     enrollment = Enrollment(
-        user_id=current_user.id,
+        user_id=current_user["id"],
         class_id=class_to_join.id
     )
     
@@ -125,16 +125,16 @@ async def join_class(
 @router.get("/{class_id}/invite", response_model=dict)
 async def get_invite_code(
     class_id: int,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get invite code for a class (teacher only)."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can access invite codes")
     
     cls = db.query(Class).filter(
         Class.id == class_id,
-        Class.teacher_id == current_user.id
+        Class.teacher_id == current_user["id"]
     ).first()
     
     if not cls:

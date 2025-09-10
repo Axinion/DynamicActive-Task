@@ -7,7 +7,7 @@ from ..db.models import User, Assignment, Question, Submission, Response, Class,
 from ..schemas.assignments import (
     AssignmentCreate, AssignmentResponse, SubmissionCreate, SubmissionResponse
 )
-from .auth import get_current_user_simple
+from ..core.security import get_current_user
 
 router = APIRouter()
 
@@ -15,17 +15,17 @@ router = APIRouter()
 @router.post("/", response_model=AssignmentResponse)
 async def create_assignment(
     assignment_data: AssignmentCreate,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new assignment (teacher only)."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create assignments")
     
     # Verify teacher owns the class
     class_ = db.query(Class).filter(
         Class.id == assignment_data.class_id,
-        Class.teacher_id == current_user.id
+        Class.teacher_id == current_user["id"]
     ).first()
     
     if not class_:
@@ -65,7 +65,7 @@ async def create_assignment(
 @router.get("/{assignment_id}", response_model=AssignmentResponse)
 async def get_assignment(
     assignment_id: int,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get a specific assignment."""
@@ -75,17 +75,17 @@ async def get_assignment(
         raise HTTPException(status_code=404, detail="Assignment not found")
     
     # Check access permissions
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         class_ = db.query(Class).filter(
             Class.id == assignment.class_id,
-            Class.teacher_id == current_user.id
+            Class.teacher_id == current_user["id"]
         ).first()
         if not class_:
             raise HTTPException(status_code=403, detail="Access denied")
     else:
         # Check if student is enrolled in the class
         enrollment = db.query(Enrollment).filter(
-            Enrollment.user_id == current_user.id,
+            Enrollment.user_id == current_user["id"],
             Enrollment.class_id == assignment.class_id
         ).first()
         if not enrollment:
@@ -98,11 +98,11 @@ async def get_assignment(
 async def submit_assignment(
     assignment_id: int,
     submission_data: SubmissionCreate,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Submit an assignment (student only)."""
-    if current_user.role != "student":
+    if current_user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can submit assignments")
     
     # Verify assignment exists and student has access
@@ -112,7 +112,7 @@ async def submit_assignment(
     
     # Check if student is enrolled in the class
     enrollment = db.query(Enrollment).filter(
-        Enrollment.user_id == current_user.id,
+        Enrollment.user_id == current_user["id"],
         Enrollment.class_id == assignment.class_id
     ).first()
     if not enrollment:
@@ -121,7 +121,7 @@ async def submit_assignment(
     # Check if already submitted
     existing_submission = db.query(Submission).filter(
         Submission.assignment_id == assignment_id,
-        Submission.student_id == current_user.id
+        Submission.student_id == current_user["id"]
     ).first()
     
     if existing_submission:
@@ -130,7 +130,7 @@ async def submit_assignment(
     # Create submission
     submission = Submission(
         assignment_id=assignment_id,
-        student_id=current_user.id
+        student_id=current_user["id"]
     )
     
     db.add(submission)
@@ -155,19 +155,19 @@ async def submit_assignment(
 @router.get("/", response_model=List[AssignmentResponse])
 async def get_assignments(
     class_id: int = None,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get assignments for current user."""
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         # Teachers can see assignments from their classes
-        query = db.query(Assignment).join(Class).filter(Class.teacher_id == current_user.id)
+        query = db.query(Assignment).join(Class).filter(Class.teacher_id == current_user["id"])
         if class_id:
             query = query.filter(Assignment.class_id == class_id)
     else:
         # Students can see assignments from classes they're enrolled in
         query = db.query(Assignment).join(Class).join(Enrollment).filter(
-            Enrollment.user_id == current_user.id
+            Enrollment.user_id == current_user["id"]
         )
         if class_id:
             query = query.filter(Assignment.class_id == class_id)

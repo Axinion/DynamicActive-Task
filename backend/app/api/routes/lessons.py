@@ -4,7 +4,7 @@ from typing import List, Optional
 from ..db.session import get_db
 from ..db.models import User, Lesson, Class, Enrollment
 from ..schemas.lessons import LessonCreate, LessonResponse, LessonWithClass
-from .auth import get_current_user_simple
+from ..core.security import get_current_user
 
 router = APIRouter()
 
@@ -12,17 +12,17 @@ router = APIRouter()
 @router.post("/", response_model=LessonResponse)
 async def create_lesson(
     lesson_data: LessonCreate,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new lesson (teacher only)."""
-    if current_user.role != "teacher":
+    if current_user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create lessons")
     
     # Verify teacher owns the class
     class_ = db.query(Class).filter(
         Class.id == lesson_data.class_id,
-        Class.teacher_id == current_user.id
+        Class.teacher_id == current_user["id"]
     ).first()
     
     if not class_:
@@ -45,19 +45,19 @@ async def create_lesson(
 @router.get("/", response_model=List[LessonWithClass])
 async def get_lessons(
     class_id: Optional[int] = Query(None),
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get lessons for current user."""
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         # Teachers can see lessons from their classes
-        query = db.query(Lesson).join(Class).filter(Class.teacher_id == current_user.id)
+        query = db.query(Lesson).join(Class).filter(Class.teacher_id == current_user["id"])
         if class_id:
             query = query.filter(Lesson.class_id == class_id)
     else:
         # Students can see lessons from classes they're enrolled in
         query = db.query(Lesson).join(Class).join(Enrollment).filter(
-            Enrollment.user_id == current_user.id
+            Enrollment.user_id == current_user["id"]
         )
         if class_id:
             query = query.filter(Lesson.class_id == class_id)
@@ -78,7 +78,7 @@ async def get_lessons(
 @router.get("/{lesson_id}", response_model=LessonWithClass)
 async def get_lesson(
     lesson_id: int,
-    current_user: User = Depends(get_current_user_simple),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get a specific lesson."""
@@ -88,17 +88,17 @@ async def get_lesson(
         raise HTTPException(status_code=404, detail="Lesson not found")
     
     # Check access permissions
-    if current_user.role == "teacher":
+    if current_user["role"] == "teacher":
         class_ = db.query(Class).filter(
             Class.id == lesson.class_id,
-            Class.teacher_id == current_user.id
+            Class.teacher_id == current_user["id"]
         ).first()
         if not class_:
             raise HTTPException(status_code=403, detail="Access denied")
     else:
         # Check if student is enrolled in the class
         enrollment = db.query(Enrollment).filter(
-            Enrollment.user_id == current_user.id,
+            Enrollment.user_id == current_user["id"],
             Enrollment.class_id == lesson.class_id
         ).first()
         if not enrollment:
