@@ -26,7 +26,7 @@ def generate_invite_code(length: int = 7, db: Session = None) -> str:
     characters = string.ascii_uppercase + string.digits
     
     while True:
-        invite_code = ''.join(secrets.choices(characters, k=length))
+        invite_code = ''.join(secrets.choice(characters) for _ in range(length))
         
         # Check uniqueness if database session is provided
         if db is None:
