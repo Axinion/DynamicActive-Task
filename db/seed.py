@@ -44,7 +44,7 @@ def seed_database():
         # Teacher
         teacher = User(
             email="teacher@example.com",
-            name="Ms. Johnson",
+            name="Demo Teacher",
             role="teacher",
             password_hash=get_password_hash("pass")
         )
@@ -55,7 +55,7 @@ def seed_database():
         # Student
         student = User(
             email="student@example.com",
-            name="Alex Student",
+            name="Demo Student",
             role="student",
             password_hash=get_password_hash("pass")
         )
@@ -73,15 +73,6 @@ def seed_database():
         db.add(demo_class)
         db.commit()
         db.refresh(demo_class)
-        
-        # Create enrollment
-        print("Creating enrollment...")
-        enrollment = Enrollment(
-            user_id=student.id,
-            class_id=demo_class.id
-        )
-        db.add(enrollment)
-        db.commit()
         
         # Create demo lessons
         print("Creating demo lessons...")
@@ -196,7 +187,6 @@ def seed_database():
         print(f"  - 1 teacher: {teacher.email}")
         print(f"  - 1 student: {student.email}")
         print(f"  - 1 class: {demo_class.name} (invite code: {demo_class.invite_code})")
-        print(f"  - 1 enrollment")
         print(f"  - 3 lessons")
         print(f"  - 1 assignment with 2 questions")
         print(f"  - 1 submission with responses")
