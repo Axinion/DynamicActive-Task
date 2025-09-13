@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, LargeBinary
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, LargeBinary, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -71,7 +71,7 @@ class Assignment(Base):
     __tablename__ = "assignments"
 
     id = Column(Integer, primary_key=True, index=True)
-    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False, index=True)
     title = Column(String, nullable=False)
     type = Column(String, nullable=False)  # 'quiz' or 'written'
     rubric = Column(JSON)  # Grading rubric
@@ -89,7 +89,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    assignment_id = Column(Integer, ForeignKey("assignments.id"), nullable=False)
+    assignment_id = Column(Integer, ForeignKey("assignments.id"), nullable=False, index=True)
     type = Column(String, nullable=False)  # 'mcq' or 'short'
     prompt = Column(Text, nullable=False)
     options = Column(JSON)  # For MCQ questions
@@ -109,8 +109,8 @@ class Submission(Base):
     assignment_id = Column(Integer, ForeignKey("assignments.id"), nullable=False)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     submitted_at = Column(DateTime(timezone=True), server_default=func.now())
-    ai_score = Column(Integer)  # AI-generated score (0-100)
-    teacher_score = Column(Integer)  # Teacher score (0-100)
+    ai_score = Column(Float)  # AI-generated score (0-100)
+    teacher_score = Column(Float)  # Teacher score (0-100)
     ai_explanation = Column(Text)  # AI explanation of scoring
 
     # Relationships
@@ -125,9 +125,9 @@ class Response(Base):
     id = Column(Integer, primary_key=True, index=True)
     submission_id = Column(Integer, ForeignKey("submissions.id"), nullable=False)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
-    student_answer = Column(Text, nullable=False)
-    ai_score = Column(Integer)  # AI score for this response (0-100)
-    teacher_score = Column(Integer)  # Teacher score for this response (0-100)
+    student_answer = Column(Text, nullable=False)  # Can be TEXT or JSON
+    ai_score = Column(Float)  # AI score for this response (0-100)
+    teacher_score = Column(Float)  # Teacher score for this response (0-100)
     ai_feedback = Column(Text)  # AI feedback for this response
 
     # Relationships

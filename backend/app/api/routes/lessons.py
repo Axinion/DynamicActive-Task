@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from ...db.session import get_db
 from ...db.models import User, Lesson, Class, Enrollment
-from ...schemas.lessons import LessonCreate, LessonResponse, LessonWithClass
+from ...schemas.lessons import LessonCreate, LessonRead, LessonWithClass
 from ...core.security import get_current_user
 
 router = APIRouter()
 
 
-@router.post("/", response_model=LessonResponse)
+@router.post("/", response_model=LessonRead)
 async def create_lesson(
     lesson_data: LessonCreate,
     current_user: dict = Depends(get_current_user),
@@ -39,30 +39,31 @@ async def create_lesson(
     db.commit()
     db.refresh(new_lesson)
     
-    return LessonResponse.model_validate(new_lesson)
+    return LessonRead.model_validate(new_lesson)
 
 
 @router.get("/", response_model=List[LessonWithClass])
 async def get_lessons(
-    class_id: Optional[int] = Query(None),
+    class_id: int = Query(..., description="Class ID is required"),
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get lessons for current user."""
+    """Get lessons for a specific class. Returns lessons sorted by created_at DESC."""
     if current_user["role"] == "teacher":
         # Teachers can see lessons from their classes
-        query = db.query(Lesson).join(Class).filter(Class.teacher_id == current_user["id"])
-        if class_id:
-            query = query.filter(Lesson.class_id == class_id)
+        query = db.query(Lesson).join(Class).filter(
+            Class.teacher_id == current_user["id"],
+            Lesson.class_id == class_id
+        )
     else:
         # Students can see lessons from classes they're enrolled in
         query = db.query(Lesson).join(Class).join(Enrollment).filter(
-            Enrollment.user_id == current_user["id"]
+            Enrollment.user_id == current_user["id"],
+            Lesson.class_id == class_id
         )
-        if class_id:
-            query = query.filter(Lesson.class_id == class_id)
     
-    lessons = query.all()
+    # Sort by created_at DESC
+    lessons = query.order_by(Lesson.created_at.desc()).all()
     
     result = []
     for lesson in lessons:

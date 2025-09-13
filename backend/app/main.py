@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .db.session import create_tables
-from .api.routes import auth, classes, lessons, assignments, grading, recommendations
+from .api.routes import auth, classes, lessons, assignments, grading, recommendations, gradebook
 
 app = FastAPI(
     title="K12 LMS API",
@@ -28,6 +28,7 @@ app.include_router(lessons.router, prefix="/api/lessons", tags=["lessons"])
 app.include_router(assignments.router, prefix="/api/assignments", tags=["assignments"])
 app.include_router(grading.router, prefix="/api/grading", tags=["grading"])
 app.include_router(recommendations.router, prefix="/api/recommendations", tags=["recommendations"])
+app.include_router(gradebook.router, prefix="/api/gradebook", tags=["gradebook"])
 
 
 @app.get("/")

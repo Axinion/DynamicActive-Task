@@ -93,27 +93,19 @@ def seed_database():
         )
         db.add(lesson2)
         
-        lesson3 = Lesson(
-            class_id=demo_class.id,
-            title="Systems of Linear Equations",
-            content="Sometimes we need to solve multiple linear equations simultaneously. This lesson covers methods for solving systems of linear equations, including substitution and elimination methods.",
-            skill_tags=["systems_of_equations", "substitution", "elimination", "advanced_algebra"]
-        )
-        db.add(lesson3)
-        
         db.commit()
         
         # Create demo assignment
         print("Creating demo assignment...")
         assignment = Assignment(
             class_id=demo_class.id,
-            title="Linear Equations Quiz",
+            title="Algebra Fundamentals Quiz",
             type="quiz",
             rubric={
-                "accuracy": 40,
+                "accuracy": 50,
                 "method": 30,
                 "explanation": 20,
-                "presentation": 10
+                "keywords": ["isolate", "inverse operations", "substitute", "verify"]
             },
             due_at=datetime.now() + timedelta(days=7)
         )
@@ -124,24 +116,24 @@ def seed_database():
         # Create demo questions
         print("Creating demo questions...")
         
-        # MCQ question
+        # Q1: MCQ question
         question1 = Question(
             assignment_id=assignment.id,
             type="mcq",
-            prompt="What is the solution to the equation 2x + 5 = 13?",
-            options=["x = 4", "x = 6", "x = 8", "x = 9"],
+            prompt="What is the solution to the equation 2x + 3 = 11?",
+            options=["x = 4", "x = 5", "x = 6", "x = 7"],
             answer_key="x = 4",
-            skill_tags=["linear_equations", "basic_algebra"]
+            skill_tags=["linear_equations", "basic_algebra", "solving"]
         )
         db.add(question1)
         
-        # Short answer question
+        # Q2: Short answer question
         question2 = Question(
             assignment_id=assignment.id,
             type="short",
-            prompt="Explain the steps to solve the equation 3x - 7 = 14. Show your work and explain each step.",
-            answer_key="Add 7 to both sides: 3x = 21. Then divide both sides by 3: x = 7. The key steps are isolating the variable by performing inverse operations.",
-            skill_tags=["linear_equations", "problem_solving", "explanation"]
+            prompt="Solve the equation 3x - 5 = 10. Show all your work and explain each step using proper mathematical terminology.",
+            answer_key="Add 5 to both sides: 3x = 15. Then divide both sides by 3: x = 5. The key steps are isolating the variable by performing inverse operations.",
+            skill_tags=["linear_equations", "problem_solving", "explanation", "mathematical_communication"]
         )
         db.add(question2)
         
@@ -187,12 +179,22 @@ def seed_database():
         print(f"  - 1 teacher: {teacher.email}")
         print(f"  - 1 student: {student.email}")
         print(f"  - 1 class: {demo_class.name} (invite code: {demo_class.invite_code})")
-        print(f"  - 3 lessons")
+        print(f"  - 2 lessons")
         print(f"  - 1 assignment with 2 questions")
         print(f"  - 1 submission with responses")
         print(f"\nDemo credentials:")
         print(f"  Teacher: teacher@example.com / pass")
         print(f"  Student: student@example.com / pass")
+        print(f"\n🎯 Testing Tips:")
+        print(f"  📚 Class Invite Code: {demo_class.invite_code}")
+        print(f"  📝 Assignment: '{assignment.title}' with MCQ + Short Answer")
+        print(f"  🔍 Q1 (MCQ): Answer is 'x = 4' (auto-graded)")
+        print(f"  📖 Q2 (Short): Keywords in rubric: isolate, inverse operations, substitute, verify")
+        print(f"  🧪 Test Flow:")
+        print(f"     1. Login as student → Join class with code: {demo_class.invite_code}")
+        print(f"     2. View assignment → Submit answers")
+        print(f"     3. Login as teacher → Check gradebook for submissions")
+        print(f"     4. Test auto-grading: MCQ gets 100% if correct, 0% if wrong")
         
     except Exception as e:
         print(f"❌ Error seeding database: {e}")

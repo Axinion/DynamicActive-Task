@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { EmptyState } from '@/components/EmptyState';
@@ -130,12 +131,16 @@ export default function TeacherDashboard() {
                           </div>
                         </div>
                         <div className="flex space-x-2 ml-4">
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Manage
-                          </Button>
+                          <Link href={`/teacher/classes/${cls.id}`}>
+                            <Button variant="outline" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                          <Link href={`/teacher/classes/${cls.id}/lessons`}>
+                            <Button variant="outline" size="sm">
+                              Manage
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </CardContent>
