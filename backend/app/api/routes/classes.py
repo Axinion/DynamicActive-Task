@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-import secrets
-import string
 from ..db.session import get_db
 from ..db.models import User, Class, Enrollment
-from ..schemas.classes import ClassCreate, ClassResponse, ClassWithDetails, JoinClassRequest, JoinClassResponse
+from ..schemas.classes import (
+    ClassCreate, ClassResponse, ClassWithDetails, 
+    JoinClassRequest, JoinClassResponse, InviteRegenerateResponse
+)
 from ..core.security import get_current_user
+from ..services.invite import generate_invite_code
 
 router = APIRouter()
 
@@ -19,14 +21,13 @@ async def create_class(
 ):
     """Create a new class (teacher only)."""
     if current_user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can create classes")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Only teachers can create classes"
+        )
     
-    # Generate unique invite code
-    invite_code = ''.join(secrets.choices(string.ascii_uppercase + string.digits, k=6))
-    
-    # Ensure invite code is unique
-    while db.query(Class).filter(Class.invite_code == invite_code).first():
-        invite_code = ''.join(secrets.choices(string.ascii_uppercase + string.digits, k=6))
+    # Generate unique invite code using the service
+    invite_code = generate_invite_code(length=7, db=db)
     
     new_class = Class(
         name=class_data.name,
@@ -83,7 +84,10 @@ async def join_class(
 ):
     """Join a class using invite code (student only)."""
     if current_user["role"] != "student":
-        raise HTTPException(status_code=403, detail="Only students can join classes")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Only students can join classes"
+        )
     
     # Find class by invite code
     class_to_join = db.query(Class).filter(Class.invite_code == request.invite_code).first()
@@ -130,7 +134,10 @@ async def get_invite_code(
 ):
     """Get invite code for a class (teacher only)."""
     if current_user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can access invite codes")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Only teachers can access invite codes"
+        )
     
     cls = db.query(Class).filter(
         Class.id == class_id,
@@ -138,6 +145,48 @@ async def get_invite_code(
     ).first()
     
     if not cls:
-        raise HTTPException(status_code=404, detail="Class not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Class not found"
+        )
     
     return {"invite_code": cls.invite_code}
+
+
+@router.post("/{class_id}/invite", response_model=InviteRegenerateResponse)
+async def regenerate_invite_code(
+    class_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Regenerate invite code for a class (teacher only)."""
+    if current_user["role"] != "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Only teachers can regenerate invite codes"
+        )
+    
+    cls = db.query(Class).filter(
+        Class.id == class_id,
+        Class.teacher_id == current_user["id"]
+    ).first()
+    
+    if not cls:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Class not found"
+        )
+    
+    # Generate new unique invite code
+    new_invite_code = generate_invite_code(length=7, db=db)
+    
+    # Update the class with new invite code
+    cls.invite_code = new_invite_code
+    db.commit()
+    db.refresh(cls)
+    
+    return InviteRegenerateResponse(
+        success=True,
+        invite_code=new_invite_code,
+        message="Invite code regenerated successfully"
+    )
