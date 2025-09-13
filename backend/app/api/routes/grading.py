@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..db.session import get_db
-from ..db.models import User, Question
-from ..schemas.grading import GradeRequest, GradeResponse, BatchGradeRequest, BatchGradeResponse
-from ..core.security import get_current_user
+from ...db.session import get_db
+from ...db.models import User, Question
+from ...schemas.grading import GradeRequest, GradeResponse, BatchGradeRequest, BatchGradeResponse
+from ...core.security import get_current_user
 
 router = APIRouter()
 

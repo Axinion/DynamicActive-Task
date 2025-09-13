@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
-from ..db.session import get_db
-from ..db.models import User, Assignment, Question, Submission, Response, Class, Enrollment
-from ..schemas.assignments import (
+from ...db.session import get_db
+from ...db.models import User, Assignment, Question, Submission, Response, Class, Enrollment
+from ...schemas.assignments import (
     AssignmentCreate, AssignmentResponse, SubmissionCreate, SubmissionResponse
 )
-from ..core.security import get_current_user
+from ...core.security import get_current_user
 
 router = APIRouter()
 

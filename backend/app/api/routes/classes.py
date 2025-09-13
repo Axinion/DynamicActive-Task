@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from ..db.session import get_db
-from ..db.models import User, Class, Enrollment
-from ..schemas.classes import (
+from ...db.session import get_db
+from ...db.models import User, Class, Enrollment
+from ...schemas.classes import (
     ClassCreate, ClassResponse, ClassWithDetails, 
     JoinClassRequest, JoinClassResponse, InviteRegenerateResponse
 )
-from ..core.security import get_current_user
-from ..services.invite import generate_invite_code
+from ...core.security import get_current_user
+from ...services.invite import generate_invite_code
 
 router = APIRouter()
 

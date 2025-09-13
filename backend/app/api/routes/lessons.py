@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from ..db.session import get_db
-from ..db.models import User, Lesson, Class, Enrollment
-from ..schemas.lessons import LessonCreate, LessonResponse, LessonWithClass
-from ..core.security import get_current_user
+from ...db.session import get_db
+from ...db.models import User, Lesson, Class, Enrollment
+from ...schemas.lessons import LessonCreate, LessonResponse, LessonWithClass
+from ...core.security import get_current_user
 
 router = APIRouter()
 
