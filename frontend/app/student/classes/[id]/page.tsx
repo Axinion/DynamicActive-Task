@@ -9,7 +9,7 @@ import { listAssignments, AssignmentRead } from '@/lib/api/assignments';
 import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
 
-export default function TeacherClassOverviewPage() {
+export default function StudentClassOverviewPage() {
   const params = useParams();
   const classId = parseInt(params.id as string);
   
@@ -60,15 +60,6 @@ export default function TeacherClassOverviewPage() {
     fetchClassData();
   }, [fetchClassData]);
 
-  const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setToast({ message: `${label} copied to clipboard!`, type: 'success' });
-    } catch (err) {
-      setToast({ message: `Failed to copy ${label.toLowerCase()}`, type: 'error' });
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -77,12 +68,45 @@ export default function TeacherClassOverviewPage() {
     });
   };
 
-  if (!user || user.role !== 'teacher') {
+  const formatDueDate = (dateString?: string) => {
+    if (!dateString) return 'No due date';
+    const date = new Date(dateString);
+    const now = new Date();
+    const isOverdue = date < now;
+    const isDueSoon = date.getTime() - now.getTime() < 24 * 60 * 60 * 1000; // 24 hours
+    
+    return (
+      <span className={
+        isOverdue 
+          ? 'text-red-600 font-medium' 
+          : isDueSoon 
+            ? 'text-orange-600 font-medium' 
+            : 'text-gray-600'
+      }>
+        {formatDate(dateString)}
+        {isOverdue && ' (Overdue)'}
+        {isDueSoon && !isOverdue && ' (Due Soon)'}
+      </span>
+    );
+  };
+
+  const getAssignmentStatus = (assignment: AssignmentRead) => {
+    if (!assignment.due_at) return 'available';
+    
+    const dueDate = new Date(assignment.due_at);
+    const now = new Date();
+    
+    if (dueDate < now) return 'overdue';
+    if (dueDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) return 'due-soon';
+    return 'available';
+  };
+
+  if (!user || user.role !== 'student') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">Only teachers can access this page.</p>
+          <p className="text-gray-600">Only students can access this page.</p>
         </div>
       </div>
     );
@@ -102,7 +126,7 @@ export default function TeacherClassOverviewPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Class Not Found</h1>
         <p className="text-gray-600 mb-4">{error || 'The class you are looking for does not exist.'}</p>
         <Link
-          href="/teacher"
+          href="/student"
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
           Back to Dashboard
@@ -119,79 +143,70 @@ export default function TeacherClassOverviewPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{classData.name}</h1>
             <p className="text-gray-600 mt-2">
-              Class overview and quick actions
+              Your learning dashboard
             </p>
           </div>
         </div>
       </div>
 
       {/* Class Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Class Details */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Class Information</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Class Name</label>
-              <p className="mt-1 text-sm text-gray-900">{classData.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Invite Code</label>
-              <div className="mt-1 flex items-center space-x-2">
-                <code className="px-3 py-2 bg-gray-100 text-gray-900 rounded-md font-mono text-sm">
-                  {classData.invite_code}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(classData.invite_code, 'Invite code')}
-                  className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
-                  title="Copy invite code"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Class Information</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Class Name</label>
+            <p className="mt-1 text-sm text-gray-900">{classData.name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Joined</label>
+            <p className="mt-1 text-sm text-gray-900">{formatDate(classData.created_at)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Link
+          href={`/student/classes/${classId}/lessons`}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Created</label>
-              <p className="mt-1 text-sm text-gray-900">{formatDate(classData.created_at)}</p>
+            <div className="ml-4">
+              <h3 className="text-lg font-medium text-gray-900">Lessons</h3>
+              <p className="text-sm text-gray-500">
+                {lessons.length} lesson{lessons.length !== 1 ? 's' : ''} available
+              </p>
             </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link
-              href={`/teacher/classes/${classId}/lessons/new`}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create Lesson
-            </Link>
-            <Link
-              href={`/teacher/classes/${classId}/assignments/new`}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Create Assignment
-            </Link>
-            <Link
-              href={`/teacher/classes/${classId}/gradebook`}
-              className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center justify-center"
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              View Gradebook
-            </Link>
+        <Link
+          href={`/student/classes/${classId}/assignments`}
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+            </div>
+            <div className="ml-4">
+              <h3 className="text-lg font-medium text-gray-900">Assignments</h3>
+              <p className="text-sm text-gray-500">
+                {assignments.length} assignment{assignments.length !== 1 ? 's' : ''} available
+              </p>
+            </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Recent Activity */}
@@ -201,7 +216,7 @@ export default function TeacherClassOverviewPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Recent Lessons</h2>
             <Link
-              href={`/teacher/classes/${classId}/lessons`}
+              href={`/student/classes/${classId}/lessons`}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               View All
@@ -224,10 +239,10 @@ export default function TeacherClassOverviewPage() {
                     <p className="text-xs text-gray-500">Created {formatDate(lesson.created_at)}</p>
                   </div>
                   <Link
-                    href={`/teacher/classes/${classId}/lessons/${lesson.id}`}
+                    href={`/student/classes/${classId}/lessons/${lesson.id}`}
                     className="text-blue-600 hover:text-blue-800 text-sm"
                   >
-                    View
+                    Read
                   </Link>
                 </div>
               ))}
@@ -240,7 +255,7 @@ export default function TeacherClassOverviewPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Recent Assignments</h2>
             <Link
-              href={`/teacher/classes/${classId}/assignments`}
+              href={`/student/classes/${classId}/assignments`}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
               View All
@@ -256,22 +271,31 @@ export default function TeacherClassOverviewPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {assignments.slice(0, 3).map((assignment) => (
-                <div key={assignment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">{assignment.title}</h3>
-                    <p className="text-xs text-gray-500">
-                      {assignment.questions.length} questions • Created {formatDate(assignment.created_at)}
-                    </p>
+              {assignments.slice(0, 3).map((assignment) => {
+                const status = getAssignmentStatus(assignment);
+                return (
+                  <div key={assignment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">{assignment.title}</h3>
+                      <p className="text-xs text-gray-500">
+                        {assignment.questions.length} questions • Due: {formatDueDate(assignment.due_at)}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/student/assignments/${assignment.id}/take`}
+                      className={`text-sm px-3 py-1 rounded-md font-medium ${
+                        status === 'overdue'
+                          ? 'bg-red-100 text-red-800'
+                          : status === 'due-soon'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {status === 'overdue' ? 'Complete' : 'Start'}
+                    </Link>
                   </div>
-                  <Link
-                    href={`/teacher/assignments/${assignment.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    View
-                  </Link>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
