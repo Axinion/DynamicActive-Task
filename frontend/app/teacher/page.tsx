@@ -1,38 +1,71 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { EmptyState } from '@/components/EmptyState';
-import { getClasses } from '@/lib/api';
-
-interface ClassData {
-  id: number;
-  name: string;
-  student_count: number;
-  recent_activity?: string;
-}
+import { CreateClassModal } from '@/components/modals/CreateClassModal';
+import { InviteCodeCard } from '@/components/InviteCodeCard';
+import { listClasses, createClass, type ClassData } from '@/lib/api/classes';
+import { useAuthStore } from '@/lib/auth';
 
 export default function TeacherDashboard() {
   const [classes, setClasses] = useState<ClassData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [showInviteCode, setShowInviteCode] = useState<{ code: string; className: string } | null>(null);
+  const [error, setError] = useState<string>('');
+  
+  const { token } = useAuthStore();
+
+  const fetchClasses = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await listClasses(token || undefined);
+      if (response.data) {
+        setClasses(response.data);
+      } else if (response.error) {
+        setError(response.error);
+      }
+    } catch (error) {
+      console.error('Failed to fetch classes:', error);
+      setError('Failed to load classes');
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const response = await getClasses();
-        if (response.data) {
-          setClasses(response.data as ClassData[]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch classes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchClasses();
-  }, []);
+  }, [fetchClasses]);
+
+  const handleCreateClass = async (className: string) => {
+    try {
+      setIsCreating(true);
+      setError('');
+      const response = await createClass({ name: className }, token || undefined);
+      
+      if (response.data) {
+        // Refresh the classes list
+        await fetchClasses();
+        // Show invite code dialog
+        setShowInviteCode({
+          code: response.data.invite_code,
+          className: response.data.name
+        });
+        setIsCreateModalOpen(false);
+      } else if (response.error) {
+        setError(response.error);
+      }
+    } catch (error) {
+      console.error('Failed to create class:', error);
+      setError('Failed to create class');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -52,8 +85,19 @@ export default function TeacherDashboard() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 My Classes
               </h2>
-              <Button>Create Class</Button>
+              <Button 
+                onClick={() => setIsCreateModalOpen(true)}
+                disabled={isCreating}
+              >
+                {isCreating ? 'Creating...' : 'Create Class'}
+              </Button>
             </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
 
             {loading ? (
               <div className="text-center py-8">
@@ -66,18 +110,26 @@ export default function TeacherDashboard() {
                   <Card key={cls.id} className="hover:shadow-medium transition-shadow duration-200">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div className="flex-1">
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                             {cls.name}
                           </h3>
-                          <p className="text-gray-600 dark:text-gray-400 mb-1">
-                            {cls.student_count} students
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-500">
-                            {cls.recent_activity || 'No recent activity'}
-                          </p>
+                          <div className="space-y-1">
+                            <p className="text-gray-600 dark:text-gray-400">
+                              {cls.student_count || 0} students
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-500 dark:text-gray-500">Invite Code:</span>
+                              <code className="text-sm font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded border">
+                                {cls.invite_code}
+                              </code>
+                            </div>
+                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                              {cls.recent_activity || 'No recent activity'}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 ml-4">
                           <Button variant="outline" size="sm">
                             View
                           </Button>
@@ -95,7 +147,14 @@ export default function TeacherDashboard() {
                 icon="🏫"
                 title="No classes yet"
                 description="Create your first class to get started with teaching."
-                action={<Button>Create Class</Button>}
+                action={
+                  <Button 
+                    onClick={() => setIsCreateModalOpen(true)}
+                    disabled={isCreating}
+                  >
+                    {isCreating ? 'Creating...' : 'Create Class'}
+                  </Button>
+                }
               />
             )}
           </div>
@@ -141,6 +200,23 @@ export default function TeacherDashboard() {
             </Card>
           </div>
         </div>
+
+        {/* Create Class Modal */}
+        <CreateClassModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSubmit={handleCreateClass}
+          isLoading={isCreating}
+        />
+
+        {/* Invite Code Dialog */}
+        {showInviteCode && (
+          <InviteCodeCard
+            inviteCode={showInviteCode.code}
+            className={showInviteCode.className}
+            onClose={() => setShowInviteCode(null)}
+          />
+        )}
       </div>
     </div>
   );
