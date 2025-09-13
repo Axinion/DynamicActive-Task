@@ -54,6 +54,17 @@ function LoginForm() {
     }
   };
 
+  const fillDemoCredentials = (role: 'teacher' | 'student') => {
+    if (role === 'teacher') {
+      setEmail('teacher@example.com');
+      setPassword('pass');
+    } else {
+      setEmail('student@example.com');
+      setPassword('pass');
+    }
+    setError(''); // Clear any existing errors
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
@@ -114,17 +125,34 @@ function LoginForm() {
             <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="text-center">
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  Demo credentials:
+                  Quick demo access:
                 </p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Teacher:</span>
-                    <span className="font-mono">teacher@example.com / pass</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Student:</span>
-                    <span className="font-mono">student@example.com / pass</span>
-                  </div>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => fillDemoCredentials('teacher')}
+                    disabled={isLoading}
+                  >
+                    👨‍🏫 Use Teacher Demo
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => fillDemoCredentials('student')}
+                    disabled={isLoading}
+                  >
+                    👨‍🎓 Use Student Demo
+                  </Button>
+                </div>
+                <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                  <p>Demo credentials:</p>
+                  <p>Teacher: teacher@example.com / pass</p>
+                  <p>Student: student@example.com / pass</p>
                 </div>
               </div>
             </div>
