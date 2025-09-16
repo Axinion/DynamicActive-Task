@@ -9,6 +9,7 @@ from ...schemas.assignments import (
     AssignmentCreate, AssignmentRead, SubmissionCreate, SubmissionResponse, SubmissionRead
 )
 from ...core.security import get_current_user
+from ...services.grading import score_short_answer
 
 router = APIRouter()
 
@@ -166,7 +167,7 @@ async def submit_assignment(
     questions = db.query(Question).filter(Question.assignment_id == assignment_id).all()
     question_dict = {q.id: q for q in questions}
     
-    # Create responses and auto-grade MCQ questions
+    # Create responses and auto-grade all questions
     total_score = 0
     scored_questions = 0
     breakdown = []
@@ -194,39 +195,108 @@ async def submit_assignment(
                 if answer_key is not None:
                     is_correct = student_answer == answer_key
                     response.ai_score = 100.0 if is_correct else 0.0
+                    response.ai_feedback = f"MCQ {'correct' if is_correct else 'incorrect'}"
                     total_score += response.ai_score
                     scored_questions += 1
                     breakdown.append({
                         "question_id": question_id,
-                        "is_correct": is_correct,
-                        "score": response.ai_score
+                        "type": "mcq",
+                        "score": response.ai_score,
+                        "ai_feedback": response.ai_feedback,
+                        "matched_keywords": [],
+                        "is_mcq_correct": is_correct
                     })
                 else:
+                    response.ai_feedback = "Model answer missing"
                     breakdown.append({
                         "question_id": question_id,
-                        "is_correct": None,
-                        "score": None
+                        "type": "mcq",
+                        "score": None,
+                        "ai_feedback": response.ai_feedback,
+                        "matched_keywords": [],
+                        "is_mcq_correct": None
                     })
             except (json.JSONDecodeError, TypeError):
+                response.ai_feedback = "Error processing MCQ answer"
                 breakdown.append({
                     "question_id": question_id,
-                    "is_correct": None,
-                    "score": None
+                    "type": "mcq",
+                    "score": None,
+                    "ai_feedback": response.ai_feedback,
+                    "matched_keywords": [],
+                    "is_mcq_correct": None
                 })
+        
+        # AI-grade short answer questions
         else:  # short answer questions
-            response.ai_score = None  # Will be graded later
-            breakdown.append({
-                "question_id": question_id,
-                "is_correct": None,
-                "score": None
-            })
+            try:
+                # Get model answer and rubric keywords
+                model_answer = question.answer_key if question.answer_key else ""
+                rubric_keywords = question.skill_tags if question.skill_tags else []
+                
+                if model_answer and rubric_keywords:
+                    # Use AI grading service
+                    grading_result = score_short_answer(
+                        student_answer=str(student_answer),
+                        model_answer=model_answer,
+                        rubric_keywords=rubric_keywords
+                    )
+                    
+                    # Convert score from 0-1 to 0-100 scale
+                    response.ai_score = grading_result["score"] * 100.0
+                    response.ai_feedback = grading_result["explanation"]
+                    response.matched_keywords = grading_result["matched_keywords"]
+                    
+                    total_score += response.ai_score
+                    scored_questions += 1
+                    
+                    breakdown.append({
+                        "question_id": question_id,
+                        "type": "short",
+                        "score": response.ai_score,
+                        "ai_feedback": response.ai_feedback,
+                        "matched_keywords": response.matched_keywords,
+                        "is_mcq_correct": None
+                    })
+                else:
+                    # Missing model answer or rubric
+                    response.ai_score = None
+                    response.ai_feedback = "Model answer or rubric missing"
+                    response.matched_keywords = []
+                    
+                    breakdown.append({
+                        "question_id": question_id,
+                        "type": "short",
+                        "score": None,
+                        "ai_feedback": response.ai_feedback,
+                        "matched_keywords": [],
+                        "is_mcq_correct": None
+                    })
+                    
+            except Exception as e:
+                # Handle any errors in AI grading
+                response.ai_score = None
+                response.ai_feedback = f"AI grading error: {str(e)}"
+                response.matched_keywords = []
+                
+                breakdown.append({
+                    "question_id": question_id,
+                    "type": "short",
+                    "score": None,
+                    "ai_feedback": response.ai_feedback,
+                    "matched_keywords": [],
+                    "is_mcq_correct": None
+                })
         
         db.add(response)
     
-    # Calculate overall AI score for MCQ questions
+    # Calculate overall AI score (average of all scored questions)
     if scored_questions > 0:
         submission.ai_score = total_score / scored_questions
-        submission.ai_explanation = f"Auto-graded {scored_questions} multiple choice questions"
+        submission.ai_explanation = f"AI-graded {scored_questions} questions (MCQ + Short Answer)"
+    else:
+        submission.ai_score = None
+        submission.ai_explanation = "No questions could be auto-graded"
     
     db.commit()
     db.refresh(submission)

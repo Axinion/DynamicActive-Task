@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getAssignment, AssignmentRead, QuestionRead } from '@/lib/api/assignments';
+import { getAssignment, AssignmentRead } from '@/lib/api/assignments';
 import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
+import { makeHint, formatAIScore, getConfidenceMessage, HintData } from '@/lib/ai/hints';
+import { AITooltip } from '@/components/ui/InfoTooltip';
+import { GradingBadge, getGradingStatus } from '@/components/ui/GradingBadge';
+import { AssignmentPrivacyNote } from '@/components/ui/PrivacyNote';
 
 interface SubmissionResult {
   id: number;
@@ -16,20 +20,23 @@ interface SubmissionResult {
   teacher_score: number | null;
   breakdown: Array<{
     question_id: number;
-    is_correct?: boolean;
+    type: 'mcq' | 'short';
     score?: number;
+    ai_feedback?: string;
+    matched_keywords?: string[];
+    is_mcq_correct?: boolean;
   }>;
 }
 
 export default function AssignmentResultPage() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const assignmentId = parseInt(params.assignmentId as string);
   const submissionId = searchParams.get('submission_id');
   
   const [assignment, setAssignment] = useState<AssignmentRead | null>(null);
   const [submission, setSubmission] = useState<SubmissionResult | null>(null);
+  const [recommendations, setRecommendations] = useState<Array<{lesson_id: number; title: string; reason: string}>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -61,9 +68,27 @@ export default function AssignmentResultPage() {
             setSubmission(submissionData);
           }
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch assignment data');
-        setToast({ message: err.message || 'Failed to fetch assignment data', type: 'error' });
+        
+        // Fetch recommendations for the class
+        try {
+          const recResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000/api'}/recommendations?class_id=${assignmentData.class_id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (recResponse.ok) {
+            const recData = await recResponse.json();
+            setRecommendations(recData.recommendations || []);
+          }
+        } catch (err) {
+          // Recommendations are optional, don't fail the whole page
+          console.warn('Failed to fetch recommendations:', err);
+        }
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch assignment data';
+        setError(errorMessage);
+        setToast({ message: errorMessage, type: 'error' });
       } finally {
         setIsLoading(false);
       }
@@ -85,6 +110,24 @@ export default function AssignmentResultPage() {
   const getQuestionResult = (questionId: number) => {
     if (!submission?.breakdown) return null;
     return submission.breakdown.find(b => b.question_id === questionId);
+  };
+
+  const generateHintForQuestion = (question: {type: string; answer_key?: string; skill_tags?: string[]}, result: {student_answer?: string; matched_keywords?: string[]; ai_feedback?: string}) => {
+    if (!result || question.type !== 'short' || !result.ai_feedback) return null;
+    
+    const hintData: HintData = {
+      studentAnswer: result.student_answer || '',
+      modelAnswer: question.answer_key || '',
+      matchedKeywords: result.matched_keywords || [],
+      rubricKeywords: question.skill_tags || [],
+      linkedLesson: recommendations.length > 0 ? {
+        id: recommendations[0].lesson_id,
+        title: recommendations[0].title,
+        url: `/student/classes/${assignment?.class_id}/lessons/${recommendations[0].lesson_id}`
+      } : undefined
+    };
+    
+    return makeHint(hintData);
   };
 
   const getScoreDisplay = () => {
@@ -304,14 +347,124 @@ export default function AssignmentResultPage() {
                 )}
 
                 {question.type === 'short' && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                    <div className="text-sm text-gray-600 mb-2">Your Answer:</div>
-                    <div className="text-gray-900">
-                      {result && 'answer' in result ? result.answer : 'Answer submitted'}
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                      <div className="text-sm text-gray-600 mb-2">Your Answer:</div>
+                      <div className="text-gray-900">
+                        {result && 'answer' in result ? result.answer : 'Answer submitted'}
+                      </div>
                     </div>
-                    <div className="mt-2 text-sm text-gray-500">
-                      {scoreDisplay?.type === 'pending' ? 'Awaiting teacher grading' : 'Graded by teacher'}
-                    </div>
+                    
+                    {/* AI Feedback and Score */}
+                    {result && result.ai_feedback && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="text-sm font-medium text-blue-800">AI Feedback</h4>
+                            <AITooltip
+                              title="How AI Scoring Works"
+                              explanation="AI scores are calculated using semantic similarity (70%) and keyword matching (30%). The system compares your answer to the model answer and checks for key concepts. Teachers can review and adjust these scores."
+                            >
+                              <svg className="w-4 h-4 text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </AITooltip>
+                          </div>
+                          {result.score !== null && result.score !== undefined && (
+                            <div className="flex items-center space-x-2">
+                              <AITooltip
+                                title="Your Score"
+                                explanation={`You scored ${formatAIScore(result.score / 100).percentage} on this question. This score is based on how well your answer matches the expected response and includes key concepts.`}
+                              >
+                                <span className={`text-lg font-bold ${formatAIScore(result.score / 100).color} cursor-help`}>
+                                  {formatAIScore(result.score / 100).percentage}
+                                </span>
+                              </AITooltip>
+                              <span className="text-sm text-blue-600">
+                                {formatAIScore(result.score / 100).message}
+                              </span>
+                              <GradingBadge 
+                                status={getGradingStatus(result.score, null, false)} 
+                                className="ml-2"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-blue-700 mb-3">{result.ai_feedback}</p>
+                        
+                        {/* Confidence Message */}
+                        {result.score !== null && result.score !== undefined && (
+                          <p className="text-sm text-blue-600 italic">
+                            {getConfidenceMessage(result.score / 100)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* AI Hints */}
+                    {result && question.type === 'short' && (() => {
+                      const hint = generateHintForQuestion(question, result);
+                      if (!hint) return null;
+                      
+                      return (
+                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+                          <h4 className="text-sm font-medium text-green-800 mb-3">💡 Learning Tips</h4>
+                          
+                          {/* Praise */}
+                          {hint.praise && (
+                            <div className="mb-3">
+                              <p className="text-sm text-green-700">{hint.praise}</p>
+                            </div>
+                          )}
+                          
+                          {/* Suggestions */}
+                          {hint.suggestions.length > 0 && (
+                            <div className="mb-3">
+                              <h5 className="text-xs font-medium text-green-800 mb-2">Suggestions for improvement:</h5>
+                              <ul className="space-y-1">
+                                {hint.suggestions.map((suggestion, index) => (
+                                  <li key={index} className="text-sm text-green-700 flex items-start">
+                                    <span className="text-green-500 mr-2">•</span>
+                                    {suggestion}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          
+                          {/* Linked Lesson */}
+                          {hint.linkedLesson && (
+                            <div className="mt-3 pt-3 border-t border-green-200">
+                              <p className="text-xs text-green-600 mb-2">Recommended lesson:</p>
+                              <Link
+                                href={hint.linkedLesson.url}
+                                className="inline-flex items-center text-sm text-green-700 hover:text-green-800 font-medium"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                                {hint.linkedLesson.title}
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    
+                    {/* Fallback for no AI feedback */}
+                    {(!result || !result.ai_feedback) && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                        <div className="flex items-center">
+                          <svg className="h-5 w-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div>
+                            <h4 className="text-sm font-medium text-yellow-800">Awaiting Grading</h4>
+                            <p className="text-sm text-yellow-700">Your answer has been submitted and is being reviewed.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -334,17 +487,86 @@ export default function AssignmentResultPage() {
           })}
         </div>
 
+        {/* Recommendations Section */}
+        {recommendations.length > 0 && (
+          <div className="mt-8 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-medium text-purple-900 mb-2">🎯 Personalized Learning</h3>
+              <p className="text-sm text-purple-700">
+                Based on your performance, we&apos;ve identified some lessons that can help you improve!
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {recommendations.slice(0, 2).map((rec, index) => (
+                <div key={index} className="bg-white rounded-md p-4 border border-purple-100">
+                  <h4 className="font-medium text-gray-900 mb-2">{rec.title}</h4>
+                  <p className="text-sm text-gray-600 mb-3">{rec.reason}</p>
+                  <Link
+                    href={`/student/classes/${assignment.class_id}/lessons/${rec.lesson_id}`}
+                    className="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 font-medium"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    View Lesson
+                  </Link>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center">
+              <Link
+                href={`/student/classes/${assignment.class_id}/recommendations`}
+                className="inline-flex items-center bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 text-sm font-medium"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                View All Recommendations
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Privacy Note */}
+        <div className="mt-6">
+          <AssignmentPrivacyNote />
+        </div>
+
         {/* Action Buttons */}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex justify-center space-x-4">
           <Link
             href={`/student/classes/${assignment.class_id}/assignments`}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex items-center"
+            className="bg-gray-100 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-200 flex items-center"
           >
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to Assignments
           </Link>
+          
+          <Link
+            href={`/student/classes/${assignment.class_id}#progress`}
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            See your progress
+          </Link>
+          
+          {recommendations.length > 0 && (
+            <Link
+              href={`/student/classes/${assignment.class_id}/recommendations`}
+              className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              Review Recommended Lessons
+            </Link>
+          )}
         </div>
 
         {/* Toast */}

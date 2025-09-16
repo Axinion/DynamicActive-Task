@@ -161,8 +161,8 @@ def score_short_answer(
                  f"{', '.join(matched_keywords) if matched_keywords else 'key concepts'}."
     
     return {
-        "score": final_score,
-        "confidence": confidence,
+        "score": float(final_score),  # Convert to Python float for JSON serialization
+        "confidence": float(confidence),  # Convert to Python float for JSON serialization
         "explanation": explanation,
         "matched_keywords": matched_keywords
     }

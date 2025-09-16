@@ -5,17 +5,24 @@ interface CardProps {
   children: ReactNode;
   className?: string;
   padding?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outlined' | 'elevated';
 }
 
-export function Card({ children, className, padding = 'md' }: CardProps) {
+export function Card({ children, className, padding = 'md', variant = 'default' }: CardProps) {
   const paddingClasses = {
     sm: 'p-4',
     md: 'p-6',
     lg: 'p-8',
   };
 
+  const variantClasses = {
+    default: 'bg-white dark:bg-muted-800 rounded-2xl shadow-soft border border-muted-200 dark:border-muted-700',
+    outlined: 'bg-white dark:bg-muted-800 rounded-2xl border-2 border-muted-300 dark:border-muted-600',
+    elevated: 'bg-white dark:bg-muted-800 rounded-2xl shadow-medium border border-muted-200 dark:border-muted-700',
+  };
+
   return (
-    <div className={cn('card', paddingClasses[padding], className)}>
+    <div className={cn(variantClasses[variant], paddingClasses[padding], className)}>
       {children}
     </div>
   );
@@ -41,7 +48,7 @@ interface CardTitleProps {
 
 export function CardTitle({ children, className }: CardTitleProps) {
   return (
-    <h3 className={cn('text-lg font-semibold text-gray-900 dark:text-gray-100', className)}>
+    <h3 className={cn('text-lg font-semibold text-muted-900 dark:text-muted-100', className)}>
       {children}
     </h3>
   );
@@ -54,7 +61,7 @@ interface CardContentProps {
 
 export function CardContent({ children, className }: CardContentProps) {
   return (
-    <div className={cn('text-gray-600 dark:text-gray-300', className)}>
+    <div className={cn('text-muted-600 dark:text-muted-300', className)}>
       {children}
     </div>
   );

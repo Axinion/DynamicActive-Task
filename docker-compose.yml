@@ -1,41 +1,45 @@
 version: '3.8'
 
 services:
-  backend:
+  api:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
-      - backend_deps:/app/.venv
+      - sqlite_data:/app/data
     environment:
-      - DATABASE_URL=sqlite:///./k12.db
+      - DATABASE_URL=sqlite:///./data/k12_lms.db
       - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - db
+      - SECRET_KEY=docker-secret-key-change-in-production
+      - ALLOWED_ORIGIN=http://localhost:3000
+      - API_VERSION=1.0.0
+      - ENVIRONMENT=docker
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  frontend:
+  web:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
     environment:
       - NEXT_PUBLIC_API_BASE=http://localhost:8000/api
-    command: npm run dev
-
-  db:
-    image: sqlite:latest
-    volumes:
-      - ./db:/data
-    command: echo "SQLite database will be created by the backend"
+      - NEXT_PUBLIC_ENVIRONMENT=docker
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  backend_deps:
+  sqlite_data:

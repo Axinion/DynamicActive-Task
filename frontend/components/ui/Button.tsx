@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -15,13 +15,14 @@ export function Button({
   className,
   ...props 
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-xl transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
   
   const variantClasses = {
-    primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500',
-    secondary: 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 focus:ring-gray-500',
-    outline: 'border border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-gray-500',
-    ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-gray-500',
+    primary: 'bg-primary-600 hover:bg-primary-700 text-white focus-visible:ring-primary-500',
+    secondary: 'bg-muted-100 hover:bg-muted-200 dark:bg-muted-700 dark:hover:bg-muted-600 text-muted-900 dark:text-muted-100 focus-visible:ring-muted-500',
+    outline: 'border border-muted-300 dark:border-muted-600 bg-transparent hover:bg-muted-50 dark:hover:bg-muted-800 text-muted-700 dark:text-muted-300 focus-visible:ring-muted-500',
+    ghost: 'bg-transparent hover:bg-muted-100 dark:hover:bg-muted-800 text-muted-700 dark:text-muted-300 focus-visible:ring-muted-500',
+    link: 'bg-transparent hover:bg-transparent text-primary-600 hover:text-primary-700 underline-offset-4 hover:underline focus-visible:ring-primary-500',
   };
   
   const sizeClasses = {

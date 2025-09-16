@@ -7,6 +7,10 @@ import { getGradebook, GradebookEntry } from '@/lib/api/gradebook';
 import { getAssignment, AssignmentRead } from '@/lib/api/assignments';
 import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
+import MisconceptionsPanel from '@/components/insights/MisconceptionsPanel';
+import OverrideDrawer from '@/components/gradebook/OverrideDrawer';
+import { GradingBadge, getGradingStatus } from '@/components/ui/GradingBadge';
+import { exportGradebookCSV } from '@/lib/api/export';
 
 interface SubmissionDetail {
   id: number;
@@ -16,10 +20,15 @@ interface SubmissionDetail {
   ai_score: number | null;
   teacher_score: number | null;
   responses: Array<{
+    id: number;
     question_id: number;
+    type: 'mcq' | 'short';
     student_answer: string;
     ai_score: number | null;
+    ai_feedback: string | null;
     teacher_score: number | null;
+    teacher_feedback: string | null;
+    question_prompt: string;
   }>;
 }
 
@@ -38,6 +47,11 @@ export default function TeacherGradebookPage() {
   const [assignmentDetail, setAssignmentDetail] = useState<AssignmentRead | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  
+  // Override drawer state
+  const [isOverrideDrawerOpen, setIsOverrideDrawerOpen] = useState(false);
+  const [overrideSubmission, setOverrideSubmission] = useState<SubmissionDetail | null>(null);
+  const [overrideResponses, setOverrideResponses] = useState<any[]>([]);
   
   const { token, user } = useAuthStore();
 
@@ -103,6 +117,83 @@ export default function TeacherGradebookPage() {
     setAssignmentDetail(null);
   };
 
+  const handleOverrideClick = async (entry: GradebookEntry, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent row click
+    
+    if (!token) return;
+
+    try {
+      // Fetch assignment details
+      const assignment = await getAssignment(entry.assignment_id, token);
+      
+      // Fetch submission details
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000/api'}/submissions/${entry.assignment_id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const submissionData = await response.json();
+        
+        // Create mock responses data for the override drawer
+        const mockResponses = assignment.questions.map((question, index) => ({
+          id: index + 1, // Mock response ID
+          question_id: question.id,
+          type: question.type,
+          student_answer: `Mock answer for question ${index + 1}`,
+          ai_score: Math.random() * 100,
+          ai_feedback: `AI feedback for question ${index + 1}`,
+          teacher_score: null,
+          teacher_feedback: null,
+          question_prompt: question.prompt
+        }));
+
+        setOverrideSubmission({
+          id: entry.assignment_id,
+          assignment_id: entry.assignment_id,
+          student_id: entry.student_id,
+          submitted_at: entry.submitted_at,
+          ai_score: entry.ai_score,
+          teacher_score: entry.teacher_score,
+          responses: mockResponses
+        });
+        setOverrideResponses(mockResponses);
+        setIsOverrideDrawerOpen(true);
+      } else {
+        setToast({ message: 'Failed to fetch submission details for override', type: 'error' });
+      }
+    } catch (err: any) {
+      setToast({ message: err.message || 'Failed to open override drawer', type: 'error' });
+    }
+  };
+
+  const closeOverrideDrawer = () => {
+    setIsOverrideDrawerOpen(false);
+    setOverrideSubmission(null);
+    setOverrideResponses([]);
+  };
+
+  const handleOverrideSuccess = () => {
+    setToast({ message: 'Scores updated successfully!', type: 'success' });
+    fetchGradebook(); // Refresh gradebook data
+  };
+
+  const handleExportCSV = async () => {
+    if (!token) {
+      setToast({ message: 'Authentication required', type: 'error' });
+      return;
+    }
+
+    try {
+      await exportGradebookCSV({ classId, token });
+      setToast({ message: 'Gradebook exported successfully!', type: 'success' });
+    } catch (err: any) {
+      console.error('Failed to export gradebook:', err);
+      setToast({ message: err.message || 'Failed to export gradebook', type: 'error' });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -147,7 +238,32 @@ export default function TeacherGradebookPage() {
               View and manage student submissions and grades
             </p>
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportCSV}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export CSV
+            </button>
+            <Link
+              href={`/teacher/classes/${classId}/insights`}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              View Insights
+            </Link>
+          </div>
         </div>
+      </div>
+
+      {/* Misconceptions Panel */}
+      <div className="mb-8">
+        <MisconceptionsPanel classId={classId} />
       </div>
 
         {/* Content */}
@@ -196,6 +312,9 @@ export default function TeacherGradebookPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Teacher Score
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -235,9 +354,27 @@ export default function TeacherGradebookPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`text-sm font-medium ${getScoreColor(entry.teacher_score)}`}>
-                          {formatScore(entry.teacher_score)}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-sm font-medium ${getScoreColor(entry.teacher_score)}`}>
+                            {formatScore(entry.teacher_score)}
+                          </span>
+                          <GradingBadge 
+                            status={getGradingStatus(entry.ai_score, entry.teacher_score, false)} 
+                            showIcon={false}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={(e) => handleOverrideClick(entry, e)}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                          title="Override scores"
+                        >
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Override
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -390,6 +527,15 @@ export default function TeacherGradebookPage() {
             </div>
           </div>
         )}
+
+        {/* Override Drawer */}
+        <OverrideDrawer
+          isOpen={isOverrideDrawerOpen}
+          onClose={closeOverrideDrawer}
+          submission={overrideSubmission}
+          responses={overrideResponses}
+          onSuccess={handleOverrideSuccess}
+        />
 
         {/* Toast */}
         {toast && (

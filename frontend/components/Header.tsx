@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { DemoModeToggle } from '@/components/demo/DemoModeToggle';
 
 interface HeaderProps {
   user?: {
@@ -18,10 +19,11 @@ export function Header({ user, onLogout }: HeaderProps) {
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               K12 LMS
             </h1>
+            <DemoModeToggle />
           </div>
           
           {user && (

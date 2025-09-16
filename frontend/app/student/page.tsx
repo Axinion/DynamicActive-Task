@@ -7,6 +7,10 @@ import { EmptyState } from '@/components/EmptyState';
 import { Toast } from '@/components/Toast';
 import { listClasses, joinClass, type ClassData } from '@/lib/api/classes';
 import { useAuthStore } from '@/lib/auth';
+import LearningPathCard from '@/components/recs/LearningPathCard';
+import { SkillProgressCard } from '@/components/progress/SkillProgressCard';
+import { getSkillProgress } from '@/lib/api/progress';
+import { useRouter } from 'next/navigation';
 
 export default function StudentDashboard() {
   const [classes, setClasses] = useState<ClassData[]>([]);
@@ -15,8 +19,11 @@ export default function StudentDashboard() {
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string>('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [skillProgress, setSkillProgress] = useState<any>(null);
+  const [progressLoading, setProgressLoading] = useState(false);
   
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
+  const router = useRouter();
 
   const fetchClasses = useCallback(async () => {
     try {
@@ -36,9 +43,33 @@ export default function StudentDashboard() {
     }
   }, [token]);
 
+  const fetchSkillProgress = useCallback(async () => {
+    if (!token || !user || classes.length === 0) return;
+    
+    try {
+      setProgressLoading(true);
+      // Use the first class for now, could be enhanced to show progress for all classes
+      const response = await getSkillProgress(
+        { classId: classes[0].id, studentId: user.id },
+        token
+      );
+      setSkillProgress(response);
+    } catch (error) {
+      console.error('Failed to fetch skill progress:', error);
+    } finally {
+      setProgressLoading(false);
+    }
+  }, [token, user, classes]);
+
   useEffect(() => {
     fetchClasses();
   }, [fetchClasses]);
+
+  useEffect(() => {
+    if (classes.length > 0) {
+      fetchSkillProgress();
+    }
+  }, [fetchSkillProgress]);
 
   const handleJoinClass = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +98,12 @@ export default function StudentDashboard() {
     }
   };
 
+  const handlePracticeNext = () => {
+    if (classes.length > 0) {
+      router.push(`/student/classes/${classes[0].id}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -78,6 +115,26 @@ export default function StudentDashboard() {
             View your classes, complete assignments, and track your progress.
           </p>
         </div>
+
+        {/* Learning Path Card - Show for first class if available */}
+        {classes.length > 0 && (
+          <div className="mb-8">
+            <LearningPathCard classId={classes[0].id} />
+          </div>
+        )}
+
+        {/* Skill Progress Card - Show for first class if available */}
+        {classes.length > 0 && (
+          <div className="mb-8">
+            <SkillProgressCard
+              data={skillProgress?.skill_mastery || []}
+              overallMastery={skillProgress?.overall_mastery_avg || 0}
+              totalResponses={skillProgress?.total_responses || 0}
+              onPracticeClick={handlePracticeNext}
+              loading={progressLoading}
+            />
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">

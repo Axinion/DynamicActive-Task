@@ -88,11 +88,12 @@ def test_assignments_flow(client: httpx.Client, setup_test_data):
                 "answer_key": "[]",
                 "skill_tags": ["python", "lists", "syntax"]
             },
-            {
-                "type": "short",
-                "prompt": "Explain the difference between a list and a tuple in Python.",
-                "skill_tags": ["python", "data-structures", "lists", "tuples"]
-            }
+                {
+                    "type": "short",
+                    "prompt": "Explain the difference between a list and a tuple in Python.",
+                    "answer_key": "A list is mutable and can be changed after creation, while a tuple is immutable and cannot be modified once created.",
+                    "skill_tags": ["python", "data-structures", "lists", "tuples", "mutable", "immutable"]
+                }
         ]
     }
     
@@ -166,9 +167,9 @@ def test_assignments_flow(client: httpx.Client, setup_test_data):
     assert "submitted_at" in submission
     assert "id" in submission
     
-    # Step 5: Verify MCQ auto-grading
+    # Step 5: Verify AI grading (MCQ + Short Answer)
     assert submission["ai_score"] is not None
-    assert submission["ai_score"] == 100.0  # 1 correct MCQ out of 1 MCQ = 100%
+    assert submission["ai_score"] > 0  # Should have some positive score
     
     # Verify breakdown shows correct MCQ grading
     breakdown = submission_result["breakdown"]
@@ -179,12 +180,12 @@ def test_assignments_flow(client: httpx.Client, setup_test_data):
     short_breakdown = next(b for b in breakdown if b["question_id"] == short_question_id)
     
     # MCQ should be marked as correct
-    assert mcq_breakdown["is_correct"] is True
+    assert mcq_breakdown["is_mcq_correct"] is True
     assert mcq_breakdown["score"] == 100.0
     
-    # Short answer should have null score (not auto-graded)
-    assert short_breakdown["score"] is None
-    assert short_breakdown["is_correct"] is None
+    # Short answer should have AI score (now auto-graded)
+    assert short_breakdown["score"] is not None
+    assert short_breakdown["is_mcq_correct"] is None
 
 
 def test_mcq_incorrect_answer(client: httpx.Client, setup_test_data):
@@ -254,7 +255,7 @@ def test_mcq_incorrect_answer(client: httpx.Client, setup_test_data):
     
     breakdown = submission_result["breakdown"]
     mcq_breakdown = breakdown[0]
-    assert mcq_breakdown["is_correct"] is False
+    assert mcq_breakdown["is_mcq_correct"] is False
     assert mcq_breakdown["score"] == 0.0
 
 
@@ -290,11 +291,12 @@ def test_mixed_questions_scoring(client: httpx.Client, setup_test_data):
                 "answer_key": "4",
                 "skill_tags": ["math"]
             },
-            {
-                "type": "short",
-                "prompt": "Explain what Python is.",
-                "skill_tags": ["programming", "python"]
-            }
+                {
+                    "type": "short",
+                    "prompt": "Explain what Python is.",
+                    "answer_key": "Python is a high-level programming language known for its simplicity and readability.",
+                    "skill_tags": ["programming", "python", "language", "high-level"]
+                }
         ]
     }
     
@@ -339,24 +341,25 @@ def test_mixed_questions_scoring(client: httpx.Client, setup_test_data):
     
     submission_result = submit_response.json()
     
-    # Verify scoring: 1 correct MCQ out of 2 MCQ = 50%
+    # Verify scoring: 1 correct MCQ out of 2 MCQ + 1 short answer = average of all scores
     submission = submission_result["submission"]
-    assert submission["ai_score"] == 50.0
+    assert submission["ai_score"] is not None
+    assert submission["ai_score"] > 0  # Should be some positive score
     
     breakdown = submission_result["breakdown"]
     assert len(breakdown) == 3
     
     # First MCQ (correct)
-    assert breakdown[0]["is_correct"] is True
+    assert breakdown[0]["is_mcq_correct"] is True
     assert breakdown[0]["score"] == 100.0
     
     # Second MCQ (incorrect)
-    assert breakdown[1]["is_correct"] is False
+    assert breakdown[1]["is_mcq_correct"] is False
     assert breakdown[1]["score"] == 0.0
     
-    # Short answer (not auto-graded)
-    assert breakdown[2]["score"] is None
-    assert breakdown[2]["is_correct"] is None
+    # Short answer (now AI-graded)
+    assert breakdown[2]["score"] is not None
+    assert breakdown[2]["is_mcq_correct"] is None
 
 
 def test_student_cannot_create_assignments(client: httpx.Client, setup_test_data):

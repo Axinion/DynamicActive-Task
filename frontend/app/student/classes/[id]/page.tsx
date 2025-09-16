@@ -8,6 +8,9 @@ import { listLessons, LessonRead } from '@/lib/api/lessons';
 import { listAssignments, AssignmentRead } from '@/lib/api/assignments';
 import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
+import LearningPathCard from '@/components/recs/LearningPathCard';
+import { SkillProgressCard } from '@/components/progress/SkillProgressCard';
+import { getSkillProgress } from '@/lib/api/progress';
 
 export default function StudentClassOverviewPage() {
   const params = useParams();
@@ -16,6 +19,7 @@ export default function StudentClassOverviewPage() {
   const [classData, setClassData] = useState<ClassRead | null>(null);
   const [lessons, setLessons] = useState<LessonRead[]>([]);
   const [assignments, setAssignments] = useState<AssignmentRead[]>([]);
+  const [skillProgress, setSkillProgress] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -47,6 +51,20 @@ export default function StudentClassOverviewPage() {
       
       setLessons(lessonsData);
       setAssignments(assignmentsData);
+      
+      // Fetch skill progress if user is available
+      if (user) {
+        try {
+          const progressData = await getSkillProgress(
+            { classId, studentId: user.id },
+            token
+          );
+          setSkillProgress(progressData);
+        } catch (progressErr) {
+          console.error('Failed to fetch skill progress:', progressErr);
+          // Don't fail the entire page load if progress fails
+        }
+      }
       
     } catch (err: any) {
       setError(err.message || 'Failed to fetch class data');
@@ -147,6 +165,25 @@ export default function StudentClassOverviewPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Learning Path Card */}
+      <div className="mb-8">
+        <LearningPathCard classId={classId} />
+      </div>
+
+      {/* Skill Progress Card */}
+      <div id="progress" className="mb-8">
+        <SkillProgressCard
+          data={skillProgress?.skill_mastery || []}
+          overallMastery={skillProgress?.overall_mastery_avg || 0}
+          totalResponses={skillProgress?.total_responses || 0}
+          onPracticeClick={() => {
+            // Navigate to assignments page for practice
+            window.location.href = `/student/classes/${classId}/assignments`;
+          }}
+          loading={isLoading}
+        />
       </div>
 
       {/* Class Information */}

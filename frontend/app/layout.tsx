@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import { Toaster } from "sonner";
+import { SkipToContent } from "@/components/a11y/SkipToContent";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,9 +23,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
+        <SkipToContent />
         <AuthProvider>
           {children}
         </AuthProvider>
+        <Toaster 
+          position="top-right"
+          expand={true}
+          richColors={true}
+          closeButton={true}
+        />
       </body>
     </html>
   );

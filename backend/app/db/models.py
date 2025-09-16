@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, LargeBinary, Float
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, ForeignKey, JSON, LargeBinary, Float, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -66,6 +66,12 @@ class Lesson(Base):
     # Relationships
     class_ = relationship("Class", back_populates="lessons")
 
+    # Indexes for analytics performance
+    __table_args__ = (
+        Index('ix_lessons_class_id', 'class_id'),
+        Index('ix_lessons_created_at', 'created_at'),
+    )
+
 
 class Assignment(Base):
     __tablename__ = "assignments"
@@ -101,6 +107,11 @@ class Question(Base):
     assignment = relationship("Assignment", back_populates="questions")
     responses = relationship("Response", back_populates="question")
 
+    # Indexes for analytics performance
+    __table_args__ = (
+        Index('ix_questions_assignment_id', 'assignment_id'),
+    )
+
 
 class Submission(Base):
     __tablename__ = "submissions"
@@ -108,7 +119,7 @@ class Submission(Base):
     id = Column(Integer, primary_key=True, index=True)
     assignment_id = Column(Integer, ForeignKey("assignments.id"), nullable=False)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    submitted_at = Column(DateTime(timezone=True), server_default=func.now())
+    submitted_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     ai_score = Column(Float)  # AI-generated score (0-100)
     teacher_score = Column(Float)  # Teacher score (0-100)
     ai_explanation = Column(Text)  # AI explanation of scoring
@@ -118,18 +129,33 @@ class Submission(Base):
     student = relationship("User", back_populates="submissions")
     responses = relationship("Response", back_populates="submission")
 
+    # Indexes for analytics performance
+    __table_args__ = (
+        Index('ix_submissions_submitted_at', 'submitted_at'),
+        Index('ix_submissions_assignment_id', 'assignment_id'),
+        Index('ix_submissions_student_id', 'student_id'),
+    )
+
 
 class Response(Base):
     __tablename__ = "responses"
 
     id = Column(Integer, primary_key=True, index=True)
-    submission_id = Column(Integer, ForeignKey("submissions.id"), nullable=False)
+    submission_id = Column(Integer, ForeignKey("submissions.id"), nullable=False, index=True)
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     student_answer = Column(Text, nullable=False)  # Can be TEXT or JSON
     ai_score = Column(Float)  # AI score for this response (0-100)
     teacher_score = Column(Float)  # Teacher score for this response (0-100)
-    ai_feedback = Column(Text)  # AI feedback for this response
+    ai_feedback = Column(Text)  # AI feedback for this response (can store JSON)
+    teacher_feedback = Column(Text)  # Teacher feedback for this response
+    matched_keywords = Column(JSON)  # List of matched keywords from AI grading
 
     # Relationships
     submission = relationship("Submission", back_populates="responses")
     question = relationship("Question", back_populates="responses")
+
+    # Indexes for analytics performance
+    __table_args__ = (
+        Index('ix_responses_submission_id', 'submission_id'),
+        Index('ix_responses_question_id', 'question_id'),
+    )
