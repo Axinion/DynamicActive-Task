@@ -183,7 +183,7 @@ export default function TeacherInsightsPage() {
                   <div className="flex-shrink-0">
                     <Badge 
                       variant={index === 0 ? 'default' : index === 1 ? 'secondary' : 'outline'}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                     >
                       {index + 1}
                     </Badge>

@@ -41,7 +41,7 @@ export function SkillProgressChart({ data }: SkillProgressChartProps) {
     return (
       <div className="h-64 flex items-center justify-center text-gray-500">
         <div className="text-center">
-          <div className="text-4xl mb-2">📊</div>
+          <div className="text-sm mb-2">📊</div>
           <p>No skill data available yet</p>
         </div>
       </div>

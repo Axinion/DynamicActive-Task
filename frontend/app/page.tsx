@@ -7,8 +7,8 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-6">
-            <span className="text-3xl">🎓</span>
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-6">
+            <span className="text-xl">🎓</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400 mb-6">
             Welcome to K12 LMS
@@ -21,8 +21,8 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:scale-105">
             <CardHeader className="pb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl">👨‍🏫</span>
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <span className="text-xl">👨‍🏫</span>
               </div>
               <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">I&apos;m a Teacher</CardTitle>
             </CardHeader>
@@ -40,8 +40,8 @@ export default function Home() {
 
           <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:scale-105">
             <CardHeader className="pb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl">👨‍🎓</span>
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <span className="text-xl">👨‍🎓</span>
               </div>
               <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">I&apos;m a Student</CardTitle>
             </CardHeader>

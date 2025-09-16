@@ -269,7 +269,7 @@ export default function TeacherGradebookPage() {
         {/* Content */}
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -285,7 +285,7 @@ export default function TeacherGradebookPage() {
           </div>
         ) : gradebookEntries.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="mx-auto h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No submissions yet</h3>
@@ -328,8 +328,8 @@ export default function TeacherGradebookPage() {
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-8 w-8">
-                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <div className="flex-shrink-0 h-6 w-6">
+                            <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center">
                               <span className="text-sm font-medium text-blue-600">
                                 {entry.student_name.charAt(0).toUpperCase()}
                               </span>
@@ -398,7 +398,7 @@ export default function TeacherGradebookPage() {
                       onClick={closeSidePanel}
                       className="text-gray-400 hover:text-gray-600"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
