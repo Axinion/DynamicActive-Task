@@ -15,9 +15,6 @@ export default function PrivacyNote({
 
   const compactContent = (
     <div className="flex items-center text-xs text-gray-600">
-      <svg className="w-3 h-3 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
       <span>AI feedback assists learning; teachers may adjust final scores.</span>
     </div>
   );
@@ -25,9 +22,6 @@ export default function PrivacyNote({
   const fullContent = (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div className="flex items-start">
-        <svg className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
         <div className="flex-1">
           <h4 className="text-sm font-medium text-blue-900 mb-1">
             About AI Feedback
@@ -48,9 +42,6 @@ export default function PrivacyNote({
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset rounded"
       >
-        <svg className="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
         <span className="text-sm font-medium text-blue-900">
           About AI Feedback
         </span>
@@ -111,9 +102,6 @@ export function AssignmentPrivacyNote({ className = '' }: { className?: string }
   return (
     <div className={`bg-blue-50 border border-blue-200 rounded-lg p-4 ${className}`}>
       <div className="flex items-start">
-        <svg className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
         <div className="flex-1">
           <h4 className="text-sm font-medium text-blue-900 mb-1">
             About Your Results
@@ -133,9 +121,6 @@ export function RecommendationPrivacyNote({ className = '' }: { className?: stri
   return (
     <div className={`bg-purple-50 border border-purple-200 rounded-lg p-3 ${className}`}>
       <div className="flex items-start">
-        <svg className="w-4 h-4 text-purple-500 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
         <div className="flex-1">
           <p className="text-xs text-purple-800">
             Recommendations are personalized based on your performance and learning patterns. 

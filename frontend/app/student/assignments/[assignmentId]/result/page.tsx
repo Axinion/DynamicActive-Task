@@ -226,9 +226,6 @@ export default function AssignmentResultPage() {
               href={`/student/classes/${assignment.class_id}/assignments`}
               className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 flex items-center"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
               Back to Assignments
             </Link>
           </div>
@@ -291,16 +288,10 @@ export default function AssignmentResultPage() {
                       }`}>
                         {result.is_correct ? (
                           <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
                             <span className="text-sm font-medium">Correct</span>
                           </>
                         ) : (
                           <>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
                             <span className="text-sm font-medium">Incorrect</span>
                           </>
                         )}
@@ -335,9 +326,6 @@ export default function AssignmentResultPage() {
                               {option}
                             </span>
                             {isCorrect && (
-                              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
                             )}
                           </div>
                         </div>
@@ -365,9 +353,6 @@ export default function AssignmentResultPage() {
                               title="How AI Scoring Works"
                               explanation="AI scores are calculated using semantic similarity (70%) and keyword matching (30%). The system compares your answer to the model answer and checks for key concepts. Teachers can review and adjust these scores."
                             >
-                              <svg className="w-4 h-4 text-blue-500 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
                             </AITooltip>
                           </div>
                           {result.score !== null && result.score !== undefined && (
@@ -531,9 +516,6 @@ export default function AssignmentResultPage() {
             href={`/student/classes/${assignment.class_id}/assignments`}
             className="bg-gray-100 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-200 flex items-center"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
             Back to Assignments
           </Link>
           
@@ -541,9 +523,6 @@ export default function AssignmentResultPage() {
             href={`/student/classes/${assignment.class_id}#progress`}
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex items-center"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
             See your progress
           </Link>
           

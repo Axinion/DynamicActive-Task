@@ -101,9 +101,6 @@ export default function MisconceptionsPanel({ classId, className = '' }: Misconc
           {error && (
             <div className="text-center py-6">
               <div className="text-red-600 mb-2">
-                <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 <p className="text-sm text-red-700">Unable to load misconceptions</p>
                 <p className="text-xs text-red-600 mt-1">{error}</p>
               </div>
@@ -114,9 +111,6 @@ export default function MisconceptionsPanel({ classId, className = '' }: Misconc
           {!isLoading && !error && clusters.length === 0 && (
             <div className="text-center py-6">
               <div className="text-gray-500 mb-3">
-                <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 <h4 className="font-medium text-gray-800 mb-2">No misconceptions detected</h4>
                 <p className="text-sm text-gray-600">
                   Great job! Your students are performing well. Check back after more assignments are submitted.
