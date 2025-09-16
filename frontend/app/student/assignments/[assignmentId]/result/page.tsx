@@ -167,8 +167,11 @@ export default function AssignmentResultPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading results...</p>
+        </div>
       </div>
     );
   }
@@ -193,60 +196,52 @@ export default function AssignmentResultPage() {
   const scoreDisplay = getScoreDisplay();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-                <Link href="/student" className="hover:text-gray-700">Dashboard</Link>
-                <span>→</span>
-                <Link href={`/student/classes/${assignment.class_id}/assignments`} className="hover:text-gray-700">Assignments</Link>
-                <span>→</span>
-                <span className="text-gray-900">{assignment.title}</span>
-              </nav>
-              <h1 className="text-3xl font-bold text-gray-900">Assignment Results</h1>
-              <div className="flex items-center space-x-4 mt-2">
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                  assignment.type === 'quiz' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {assignment.type === 'quiz' ? 'Quiz' : 'Written Assignment'}
-                </span>
-                {submission && (
-                  <span className="text-gray-600">
-                    Submitted {formatDate(submission.submitted_at)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <Link
-              href={`/student/classes/${assignment.class_id}/assignments`}
-              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 flex items-center"
-            >
-              Back to Assignments
-            </Link>
+        {/* Header - Centered */}
+        <div className="text-center mb-12">
+          <nav className="flex items-center justify-center space-x-2 text-sm text-gray-500 mb-6">
+            <Link href="/student" className="hover:text-gray-700">Dashboard</Link>
+            <span>→</span>
+            <Link href={`/student/classes/${assignment.class_id}/assignments`} className="hover:text-gray-700">Assignments</Link>
+            <span>→</span>
+            <span className="text-gray-900">{assignment.title}</span>
+          </nav>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400 mb-4">
+            Assignment Results
+          </h1>
+          <div className="flex items-center justify-center space-x-4">
+            <span className={`px-4 py-2 text-sm font-medium rounded-full ${
+              assignment.type === 'quiz' 
+                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+            }`}>
+              {assignment.type === 'quiz' ? 'Quiz' : 'Written Assignment'}
+            </span>
+            {submission && (
+              <span className="text-gray-600 dark:text-gray-400">
+                Submitted {formatDate(submission.submitted_at)}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Score Summary */}
+        {/* Score Summary - Centered */}
         {scoreDisplay && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8 mb-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{assignment.title}</h2>
-              <div className="flex items-center justify-center space-x-4">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{assignment.title}</h2>
+              <div className="flex items-center justify-center space-x-6">
                 {scoreDisplay.score !== null ? (
                   <>
-                    <div className={`text-4xl font-bold ${
+                    <div className={`text-6xl font-bold ${
                       scoreDisplay.score >= 80 ? 'text-green-600' :
                       scoreDisplay.score >= 60 ? 'text-yellow-600' : 'text-red-600'
                     }`}>
                       {Math.round(scoreDisplay.score)}%
                     </div>
-                    <div className="text-gray-600">
-                      <div className="font-medium">{scoreDisplay.label}</div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      <div className="font-medium text-lg">{scoreDisplay.label}</div>
                       <div className="text-sm">
                         {scoreDisplay.type === 'ai' && 'Auto-graded'}
                         {scoreDisplay.type === 'teacher' && 'Graded by teacher'}
@@ -255,8 +250,8 @@ export default function AssignmentResultPage() {
                   </>
                 ) : (
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-600 mb-2">Submitted</div>
-                    <div className="text-gray-600">Awaiting teacher grading</div>
+                    <div className="text-3xl font-bold text-gray-600 dark:text-gray-400 mb-2">Submitted</div>
+                    <div className="text-gray-600 dark:text-gray-400">Awaiting teacher grading</div>
                   </div>
                 )}
               </div>
@@ -510,30 +505,32 @@ export default function AssignmentResultPage() {
           <AssignmentPrivacyNote />
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-center space-x-4">
-          <Link
-            href={`/student/classes/${assignment.class_id}/assignments`}
-            className="bg-gray-100 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-200 flex items-center"
-          >
-            Back to Assignments
-          </Link>
-          
-          <Link
-            href={`/student/classes/${assignment.class_id}#progress`}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 flex items-center"
-          >
-            See your progress
-          </Link>
-          
-          {recommendations.length > 0 && (
+        {/* Action Buttons - Centered */}
+        <div className="mt-12 text-center">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-2xl mx-auto">
             <Link
-              href={`/student/classes/${assignment.class_id}/recommendations`}
-              className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 flex items-center"
+              href={`/student/classes/${assignment.class_id}/assignments`}
+              className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-8 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-medium"
             >
-              Review Recommended Lessons
+              Back to Assignments
             </Link>
-          )}
+            
+            <Link
+              href={`/student/classes/${assignment.class_id}#progress`}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            >
+              See your progress
+            </Link>
+            
+            {recommendations.length > 0 && (
+              <Link
+                href={`/student/classes/${assignment.class_id}/recommendations`}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+              >
+                Review Recommended Lessons
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Toast */}

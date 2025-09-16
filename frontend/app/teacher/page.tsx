@@ -70,129 +70,97 @@ export default function TeacherDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400 mb-2">
-                Teacher Dashboard
-              </h1>
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
-                Manage your classes, create lessons, and track student progress with AI-powered insights.
-              </p>
-            </div>
-            <div className="flex justify-center md:block">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 border border-gray-100 dark:border-gray-700">
-                <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-400">{classes.length}</div>
-                  <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Active Classes</div>
-                </div>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header Section - Centered */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400 mb-4">
+            Teacher Dashboard
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+            Manage your classes, create lessons, and track student progress with AI-powered insights.
+          </p>
+          <div className="flex justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{classes.length}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Active Classes</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                My Classes
-              </h2>
-              <Button 
-                onClick={() => setIsCreateModalOpen(true)}
-                disabled={isCreating}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 py-2"
-              >
-                {isCreating ? 'Creating...' : '+ Create Class'}
-              </Button>
+        {/* Main Content - Centered Layout */}
+        <div className="max-w-4xl mx-auto">
+          {/* Create Class Section - Centered */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              My Classes
+            </h2>
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)}
+              disabled={isCreating}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 text-lg"
+            >
+              {isCreating ? 'Creating...' : '+ Create New Class'}
+            </Button>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
+          )}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="border-0 bg-white dark:bg-gray-800 shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
-                            <div>
-                              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-32 mb-2 animate-pulse"></div>
-                              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse"></div>
-                            </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-40 animate-pulse"></div>
-                            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse"></div>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2 ml-4">
-                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-20 animate-pulse"></div>
-                          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-16 animate-pulse"></div>
-                        </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-lg text-gray-600 dark:text-gray-400">Loading classes...</p>
+            </div>
+          ) : classes.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {classes.map((cls) => (
+                <Card key={cls.id} className="hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 bg-white dark:bg-gray-800 shadow-lg">
+                  <CardContent className="p-8 text-center">
+                    <div className="mb-6">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <span className="text-white font-bold text-2xl">
+                          {cls.name.charAt(0)}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : classes.length > 0 ? (
-              <div className="space-y-4">
-                {classes.map((cls) => (
-                  <Card key={cls.id} className="hover:shadow-xl transition-all duration-300 border-0 bg-white dark:bg-gray-800 shadow-lg hover:scale-[1.02]">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                              <span className="text-white font-bold text-lg">
-                                {cls.name.charAt(0)}
-                              </span>
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                {cls.name}
-                              </h3>
-                              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                                {cls.student_count || 0} students enrolled
-                              </p>
-                            </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Invite Code:</span>
-                              <code className="text-sm font-mono bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 px-3 py-1 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200">
-                                {cls.invite_code}
-                              </code>
-                            </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                              {cls.recent_activity || 'No recent activity'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 ml-4">
-                          <Link href={`/teacher/classes/${cls.id}`}>
-                            <Button variant="primary" size="sm" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
-                              View Class
-                            </Button>
-                          </Link>
-                          <Link href={`/teacher/classes/${cls.id}/lessons`}>
-                            <Button variant="outline" size="sm" className="w-full sm:w-auto border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20">
-                              Manage
-                            </Button>
-                          </Link>
-                        </div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        {cls.name}
+                      </h3>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
+                        {cls.student_count || 0} students enrolled
+                      </p>
+                      <div className="mb-4">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Invite Code:</span>
+                        <code className="block text-lg font-mono bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200 mt-1">
+                          {cls.invite_code}
+                        </code>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                        {cls.recent_activity || 'No recent activity'}
+                      </p>
+                    </div>
+                    <div className="space-y-3">
+                      <Link href={`/teacher/classes/${cls.id}`}>
+                        <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                          View Class
+                        </Button>
+                      </Link>
+                      <Link href={`/teacher/classes/${cls.id}/lessons`}>
+                        <Button variant="outline" className="w-full border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20">
+                          Manage Lessons
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
               <EmptyState
                 icon="🏫"
                 title="No classes yet"
@@ -201,54 +169,14 @@ export default function TeacherDashboard() {
                   <Button 
                     onClick={() => setIsCreateModalOpen(true)}
                     disabled={isCreating}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 text-lg"
                   >
-                    {isCreating ? 'Creating...' : 'Create Class'}
+                    {isCreating ? 'Creating...' : 'Create Your First Class'}
                   </Button>
                 }
               />
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  📚 Create Lesson
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  📝 Create Assignment
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  📊 View Analytics
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Algebra Quiz</span>
-                    <span className="text-gray-500">2h ago</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">New student joined</span>
-                    <span className="text-gray-500">5h ago</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Lesson published</span>
-                    <span className="text-gray-500">1d ago</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Create Class Modal */}

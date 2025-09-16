@@ -58,10 +58,16 @@ export default function Home() {
           </Card>
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Demo credentials: teacher@example.com / student@example.com (password: pass)
-          </p>
+        <div className="text-center mt-16">
+          <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 max-w-2xl mx-auto border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Demo Access
+            </h3>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <p><strong>Teacher:</strong> teacher@example.com / pass</p>
+              <p><strong>Student:</strong> student@example.com / pass</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

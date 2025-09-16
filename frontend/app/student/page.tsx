@@ -106,23 +106,20 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400 mb-2">
-                Student Dashboard
-              </h1>
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
-                View your classes, complete assignments, and track your progress with AI-powered insights.
-              </p>
-            </div>
-            <div className="flex justify-center md:block">
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 border border-gray-100 dark:border-gray-700">
-                <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-400">{classes.length}</div>
-                  <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Enrolled Classes</div>
-                </div>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header Section - Centered */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400 mb-4">
+            Student Dashboard
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+            View your classes, complete assignments, and track your progress with AI-powered insights.
+          </p>
+          <div className="flex justify-center">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{classes.length}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Enrolled Classes</div>
               </div>
             </div>
           </div>
@@ -148,28 +145,23 @@ export default function StudentDashboard() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                My Classes
-              </h2>
-            </div>
-
-            {/* Join Class Form */}
-            <Card className="mb-6">
+        {/* Main Content - Centered Layout */}
+        <div className="max-w-4xl mx-auto">
+          {/* Join Class Form - Centered */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              Join a New Class
+            </h2>
+            <Card className="max-w-md mx-auto">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                  Join a Class
-                </h3>
-                <form onSubmit={handleJoinClass} className="flex space-x-3">
-                  <div className="flex-1">
+                <form onSubmit={handleJoinClass} className="space-y-4">
+                  <div>
                     <input
                       type="text"
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                       placeholder="Enter class code (e.g., ABC123)"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-lg"
                       disabled={isJoining}
                       required
                     />
@@ -177,117 +169,73 @@ export default function StudentDashboard() {
                   <Button
                     type="submit"
                     disabled={isJoining || !inviteCode.trim()}
+                    className="w-full py-3"
                   >
                     {isJoining ? 'Joining...' : 'Join Class'}
                   </Button>
                 </form>
                 {error && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+                  <p className="mt-3 text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
                 )}
               </CardContent>
             </Card>
+          </div>
+
+          {/* Classes Section */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              My Classes
+            </h2>
 
             {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600 mx-auto mb-3"></div>
-                <p className="text-gray-600 dark:text-gray-400">Loading classes...</p>
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                <p className="text-lg text-gray-600 dark:text-gray-400">Loading classes...</p>
               </div>
             ) : classes.length > 0 ? (
-              <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                 {classes.map((cls) => (
-                  <Card key={cls.id} className="hover:shadow-medium transition-shadow duration-200">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                            {cls.name}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 mb-1">
-                            {cls.student_count} students enrolled
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
-                            {cls.recent_activity || 'No recent activity'}
-                          </p>
-                          <p className="text-sm text-primary-600 dark:text-primary-400 font-medium">
-                            Ready to learn!
-                          </p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            View
-                          </Button>
-                          <Button size="sm">
-                            Continue
-                          </Button>
-                        </div>
+                  <Card key={cls.id} className="hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <CardContent className="p-8 text-center">
+                      <div className="mb-4">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                          {cls.name}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-2">
+                          {cls.student_count} students enrolled
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                          {cls.recent_activity || 'No recent activity'}
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => router.push(`/student/classes/${cls.id}`)}
+                        >
+                          View Class
+                        </Button>
+                        <Button 
+                          className="w-full"
+                          onClick={() => router.push(`/student/classes/${cls.id}`)}
+                        >
+                          Continue Learning
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : (
-              <EmptyState
-                icon="🏫"
-                title="No classes yet"
-                description="Use the form above to join a class with an invite code."
-              />
+              <div className="text-center py-12">
+                <EmptyState
+                  icon="🏫"
+                  title="No classes yet"
+                  description="Use the form above to join a class with an invite code."
+                />
+              </div>
             )}
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Assignments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">Math Quiz</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Algebra I</p>
-                      </div>
-                      <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">
-                        Tomorrow
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">Essay</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">English Literature</p>
-                      </div>
-                      <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-                        Friday
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Grades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Algebra Homework</span>
-                    <span className="font-medium text-green-600">95%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">English Quiz</span>
-                    <span className="font-medium text-green-600">88%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">Science Project</span>
-                    <span className="font-medium text-yellow-600">Pending</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
 

@@ -154,18 +154,17 @@ export default function StudentClassOverviewPage() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{classData.name}</h1>
-            <p className="text-gray-600 mt-2">
-              Your learning dashboard
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header - Centered */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400 mb-4">
+            {classData.name}
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400">
+            Your learning dashboard
+          </p>
         </div>
-      </div>
 
       {/* Learning Path Card */}
       <div className="mb-8">
@@ -186,150 +185,132 @@ export default function StudentClassOverviewPage() {
         />
       </div>
 
-      {/* Class Information */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Class Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Class Name</label>
-            <p className="mt-1 text-sm text-gray-900">{classData.name}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Joined</label>
-            <p className="mt-1 text-sm text-gray-900">{formatDate(classData.created_at)}</p>
-          </div>
-        </div>
-      </div>
+        {/* Main Content - Centered */}
+        <div className="max-w-4xl mx-auto">
+          {/* Quick Actions - Centered */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              Quick Actions
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <Link
+                href={`/student/classes/${classId}/lessons`}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📚</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Lessons</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {lessons.length} lesson{lessons.length !== 1 ? 's' : ''} available
+                </p>
+              </Link>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Link
-          href={`/student/classes/${classId}/lessons`}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-        >
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-6 w-6 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-xs font-medium">📚</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Lessons</h3>
-              <p className="text-sm text-gray-500">
-                {lessons.length} lesson{lessons.length !== 1 ? 's' : ''} available
-              </p>
+              <Link
+                href={`/student/classes/${classId}/assignments`}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 hover:shadow-xl transition-all duration-300 hover:scale-105 text-center"
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📝</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Assignments</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {assignments.length} assignment{assignments.length !== 1 ? 's' : ''} available
+                </p>
+              </Link>
             </div>
           </div>
-        </Link>
 
-        <Link
-          href={`/student/classes/${classId}/assignments`}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-        >
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-6 w-6 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <h3 className="text-lg font-medium text-gray-900">Assignments</h3>
-              <p className="text-sm text-gray-500">
-                {assignments.length} assignment{assignments.length !== 1 ? 's' : ''} available
-              </p>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Lessons */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Lessons</h2>
-            <Link
-              href={`/student/classes/${classId}/lessons`}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              View All
-            </Link>
-          </div>
-          
-          {lessons.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p className="text-sm">No lessons yet</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {lessons.slice(0, 3).map((lesson) => (
-                <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900">{lesson.title}</h3>
-                    <p className="text-xs text-gray-500">Created {formatDate(lesson.created_at)}</p>
-                  </div>
+          {/* Recent Activity - Centered */}
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              Recent Activity
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Recent Lessons */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Recent Lessons</h3>
                   <Link
-                    href={`/student/classes/${classId}/lessons/${lesson.id}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
+                    href={`/student/classes/${classId}/lessons`}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
-                    Read
+                    View All
                   </Link>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Recent Assignments */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Assignments</h2>
-            <Link
-              href={`/student/classes/${classId}/assignments`}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              View All
-            </Link>
-          </div>
-          
-          {assignments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <svg className="mx-auto h-5 w-5 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <p className="text-sm">No assignments yet</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {assignments.slice(0, 3).map((assignment) => {
-                const status = getAssignmentStatus(assignment);
-                return (
-                  <div key={assignment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">{assignment.title}</h3>
-                      <p className="text-xs text-gray-500">
-                        {assignment.questions.length} questions • Due: {formatDueDate(assignment.due_at)}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/student/assignments/${assignment.id}/take`}
-                      className={`text-sm px-3 py-1 rounded-md font-medium ${
-                        status === 'overdue'
-                          ? 'bg-red-100 text-red-800'
-                          : status === 'due-soon'
-                          ? 'bg-orange-100 text-orange-800'
-                          : 'bg-blue-100 text-blue-800'
-                      }`}
-                    >
-                      {status === 'overdue' ? 'Complete' : 'Start'}
-                    </Link>
+                
+                {lessons.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">No lessons yet</p>
                   </div>
-                );
-              })}
+                ) : (
+                  <div className="space-y-3">
+                    {lessons.slice(0, 3).map((lesson) => (
+                      <div key={lesson.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{lesson.title}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Created {formatDate(lesson.created_at)}</p>
+                        </div>
+                        <Link
+                          href={`/student/classes/${classId}/lessons/${lesson.id}`}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          Read
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent Assignments */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="text-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Recent Assignments</h3>
+                  <Link
+                    href={`/student/classes/${classId}/assignments`}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    View All
+                  </Link>
+                </div>
+                
+                {assignments.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">No assignments yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {assignments.slice(0, 3).map((assignment) => {
+                      const status = getAssignmentStatus(assignment);
+                      return (
+                        <div key={assignment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">{assignment.title}</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {assignment.questions.length} questions • Due: {formatDueDate(assignment.due_at)}
+                            </p>
+                          </div>
+                          <Link
+                            href={`/student/assignments/${assignment.id}/take`}
+                            className={`text-sm px-3 py-1 rounded-md font-medium ${
+                              status === 'overdue'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                : status === 'due-soon'
+                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                                : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                            }`}
+                          >
+                            {status === 'overdue' ? 'Complete' : 'Start'}
+                          </Link>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
