@@ -56,7 +56,7 @@ def compute_skill_mastery(student_id: int, db: Session) -> Dict[str, float]:
     skill_mastery = {}
     for skill_tag, scores in skill_scores.items():
         if scores:
-            skill_mastery[skill_tag] = sum(scores) / len(scores)
+            skill_mastery[skill_tag] = float(sum(scores) / len(scores))
         else:
             skill_mastery[skill_tag] = 0.0
     
@@ -204,9 +204,9 @@ def rank_lessons_for_student(student_id: int, class_id: int, db: Session, k: int
             'lesson_id': lesson.id,
             'title': lesson.title,
             'reason': reason,
-            'score': combined_score,
+            'score': float(combined_score),
             'skill_tags': lesson.skill_tags,
-            'skill_mastery': {tag: skill_mastery.get(tag, 0.0) for tag in lesson.skill_tags}
+            'skill_mastery': {tag: float(skill_mastery.get(tag, 0.0)) for tag in lesson.skill_tags}
         })
     
     # Sort by score (highest first) and return top k

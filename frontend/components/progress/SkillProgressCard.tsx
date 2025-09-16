@@ -1,10 +1,10 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { SkillProgressChart } from './SkillProgressChart';
 import { SkillBadge } from './Badge';
-import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 import { ProgressLoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 
 interface SkillData {
@@ -122,10 +122,10 @@ export function SkillProgressCard({
 
         {/* Empty State */}
         {data.length === 0 && (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-2">📊</div>
-            <p className="text-gray-500 mb-2">No skill data available yet</p>
-            <p className="text-sm text-gray-400">
+          <div className="text-center py-4">
+            <div className="text-lg mb-2">📊</div>
+            <p className="text-sm text-gray-500 mb-1">No skill data available yet</p>
+            <p className="text-xs text-gray-400">
               Complete some assignments to see your skill progress
             </p>
           </div>

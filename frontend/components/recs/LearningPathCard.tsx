@@ -82,12 +82,12 @@ export default function LearningPathCard({ classId, className = '', showTitle = 
             <h3 className="text-lg font-semibold text-purple-900">My Learning Path</h3>
           </div>
         )}
-        <div className="text-center py-4">
+        <div className="text-center py-3">
           <div className="text-red-600 mb-2">
-            <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-red-700">Unable to load recommendations</p>
+            <p className="text-xs text-red-700">Unable to load recommendations</p>
             <p className="text-xs text-red-600 mt-1">{error}</p>
           </div>
         </div>
@@ -107,13 +107,13 @@ export default function LearningPathCard({ classId, className = '', showTitle = 
             <h3 className="text-lg font-semibold text-purple-900">My Learning Path</h3>
           </div>
         )}
-        <div className="text-center py-6">
-          <div className="text-purple-600 mb-3">
-            <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-center py-4">
+          <div className="text-purple-600 mb-2">
+            <svg className="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
-            <h4 className="font-medium text-purple-800 mb-2">No recommendations yet</h4>
-            <p className="text-sm text-purple-600">
+            <h4 className="font-medium text-purple-800 mb-1 text-sm">No recommendations yet</h4>
+            <p className="text-xs text-purple-600">
               Complete some assignments to get personalized lesson recommendations!
             </p>
           </div>

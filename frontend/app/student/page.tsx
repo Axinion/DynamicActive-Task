@@ -30,8 +30,8 @@ export default function StudentDashboard() {
       setLoading(true);
       setError('');
       const response = await listClasses(token || undefined);
-      if (response.data) {
-        setClasses(response.data);
+      if (Array.isArray(response)) {
+        setClasses(response);
       } else if (response.error) {
         setError(response.error);
       }
@@ -105,15 +105,27 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Student Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            View your classes, complete assignments, and track your progress.
-          </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent dark:from-purple-400 dark:to-pink-400 mb-2">
+                Student Dashboard
+              </h1>
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
+                View your classes, complete assignments, and track your progress with AI-powered insights.
+              </p>
+            </div>
+            <div className="flex justify-center md:block">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 md:p-6 border border-gray-100 dark:border-gray-700">
+                <div className="text-center">
+                  <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-400">{classes.length}</div>
+                  <div className="text-xs md:text-sm text-gray-500 dark:text-gray-400">Enrolled Classes</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Learning Path Card - Show for first class if available */}
@@ -177,7 +189,7 @@ export default function StudentDashboard() {
 
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600 mx-auto mb-3"></div>
                 <p className="text-gray-600 dark:text-gray-400">Loading classes...</p>
               </div>
             ) : classes.length > 0 ? (

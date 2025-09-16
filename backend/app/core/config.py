@@ -6,6 +6,10 @@ Validates environment variables and provides sensible defaults.
 import os
 import logging
 from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +39,13 @@ class Settings:
         # Optional variables with defaults
         self.EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
         self.SHORT_ANSWER_PASS_THRESHOLD = float(os.getenv("SHORT_ANSWER_PASS_THRESHOLD", "0.7"))
-        self.ALLOWED_ORIGIN = os.getenv("ALLOWED_ORIGIN", "http://localhost:3000")
+        # Allow multiple origins for development
+        allowed_origins = os.getenv("ALLOWED_ORIGIN", "http://localhost:3000,http://localhost:3001")
+        self.ALLOWED_ORIGIN = [origin.strip() for origin in allowed_origins.split(",")]
         self.API_VERSION = os.getenv("API_VERSION", "1.0.0")
         self.BUILD_TIME = os.getenv("BUILD_TIME", "unknown")
         self.ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+        self.ALGORITHM = os.getenv("ALGORITHM", "HS256")
         
         # Log missing critical variables
         if missing_vars:

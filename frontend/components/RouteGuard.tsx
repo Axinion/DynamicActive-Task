@@ -38,3 +38,5 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
 
   return <>{children}</>;
 }
+
+export default RouteGuard;

@@ -10,17 +10,10 @@ interface SidebarProps {
 
 const teacherNavItems = [
   { name: 'Dashboard', href: '/teacher', icon: '📊' },
-  { name: 'Classes', href: '/teacher/classes', icon: '🏫' },
-  { name: 'Lessons', href: '/teacher/lessons', icon: '📚' },
-  { name: 'Assignments', href: '/teacher/assignments', icon: '📝' },
-  { name: 'Grades', href: '/teacher/grades', icon: '📈' },
 ];
 
 const studentNavItems = [
   { name: 'Dashboard', href: '/student', icon: '📊' },
-  { name: 'My Classes', href: '/student/classes', icon: '🏫' },
-  { name: 'Assignments', href: '/student/assignments', icon: '📝' },
-  { name: 'Grades', href: '/student/grades', icon: '📈' },
 ];
 
 export function Sidebar({ role }: SidebarProps) {

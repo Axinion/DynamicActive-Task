@@ -20,7 +20,7 @@ app.add_middleware(RateLimitMiddleware)
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.ALLOWED_ORIGIN],  # Configurable origin
+    allow_origins=settings.ALLOWED_ORIGIN,  # List of allowed origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

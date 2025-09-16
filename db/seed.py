@@ -6,7 +6,7 @@ Run this script from the backend directory with the virtual environment activate
 
 import sys
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Add the backend app to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend'))

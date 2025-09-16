@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
-import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { getMisconceptions, MisconceptionsResponse, MisconceptionCluster } from '@/lib/api/insights';
 import { getMiniLessons, MiniLessonsResponse } from '@/lib/api/suggestions';
