@@ -146,9 +146,7 @@ export default function TeacherClassOverviewPage() {
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100"
                   title="Copy invite code"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                  Copy
                 </button>
               </div>
             </div>
@@ -165,29 +163,20 @@ export default function TeacherClassOverviewPage() {
           <div className="space-y-3">
             <Link
               href={`/teacher/classes/${classId}/lessons/new`}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center justify-center"
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-center"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
               Create Lesson
             </Link>
             <Link
               href={`/teacher/classes/${classId}/assignments/new`}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center justify-center"
+              className="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-center"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
               Create Assignment
             </Link>
             <Link
               href={`/teacher/classes/${classId}/gradebook`}
-              className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center justify-center"
+              className="w-full bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 text-center"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
               View Gradebook
             </Link>
           </div>
@@ -246,9 +235,6 @@ export default function TeacherClassOverviewPage() {
           
           {assignments.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <svg className="mx-auto h-5 w-5 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
               <p className="text-sm">No assignments yet</p>
             </div>
           ) : (

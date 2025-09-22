@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
 import MisconceptionsPanel from '@/components/insights/MisconceptionsPanel';
 import OverrideDrawer from '@/components/gradebook/OverrideDrawer';
-import { GradingBadge, getGradingStatus } from '@/components/ui/GradingBadge';
+import GradingBadge, { getGradingStatus } from '@/components/ui/GradingBadge';
 import { exportGradebookCSV } from '@/lib/api/export';
 
 interface SubmissionDetail {
@@ -243,18 +243,12 @@ export default function TeacherGradebookPage() {
               onClick={handleExportCSV}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
               Export CSV
             </button>
             <Link
               href={`/teacher/classes/${classId}/insights`}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
               View Insights
             </Link>
           </div>
@@ -273,21 +267,11 @@ export default function TeacherGradebookPage() {
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error loading gradebook</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
-              </div>
-            </div>
+            <h3 className="text-sm font-medium text-red-800">Error loading gradebook</h3>
+            <p className="text-sm text-red-700 mt-1">{error}</p>
           </div>
         ) : gradebookEntries.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="mx-auto h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No submissions yet</h3>
             <p className="mt-1 text-sm text-gray-500">Students haven't submitted any assignments yet.</p>
           </div>
@@ -370,9 +354,6 @@ export default function TeacherGradebookPage() {
                           className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
                           title="Override scores"
                         >
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
                           Override
                         </button>
                       </td>
@@ -398,9 +379,7 @@ export default function TeacherGradebookPage() {
                       onClick={closeSidePanel}
                       className="text-gray-400 hover:text-gray-600"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      Close
                     </button>
                   </div>
                 </div>
@@ -496,9 +475,7 @@ export default function TeacherGradebookPage() {
                                       {option}
                                     </span>
                                     {question.answer_key === option && (
-                                      <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                      </svg>
+                                      <span className="text-green-600 text-xs ml-1">✔</span>
                                     )}
                                   </div>
                                 </div>

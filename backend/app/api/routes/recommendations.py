@@ -13,6 +13,7 @@ from ...services.recommendations import get_student_recommendations
 router = APIRouter()
 
 
+@router.get("")
 @router.get("/")
 async def get_recommendations(
     class_id: int = Query(..., description="Class ID is required"),

@@ -8,7 +8,7 @@ import { useAuthStore } from '@/lib/auth';
 import { Toast } from '@/components/Toast';
 import { makeHint, formatAIScore, getConfidenceMessage, HintData } from '@/lib/ai/hints';
 import { AITooltip } from '@/components/ui/InfoTooltip';
-import { GradingBadge, getGradingStatus } from '@/components/ui/GradingBadge';
+import GradingBadge, { getGradingStatus } from '@/components/ui/GradingBadge';
 import { AssignmentPrivacyNote } from '@/components/ui/PrivacyNote';
 
 interface SubmissionResult {
@@ -25,6 +25,7 @@ interface SubmissionResult {
     ai_feedback?: string;
     matched_keywords?: string[];
     is_mcq_correct?: boolean;
+    student_answer?: string;
   }>;
 }
 
@@ -112,12 +113,17 @@ export default function AssignmentResultPage() {
     return submission.breakdown.find(b => b.question_id === questionId);
   };
 
-  const generateHintForQuestion = (question: {type: string; answer_key?: string; skill_tags?: string[]}, result: {student_answer?: string; matched_keywords?: string[]; ai_feedback?: string}) => {
+  const generateHintForQuestion = (question: {type: string; answer_key?: string | string[]; skill_tags?: string[]}, result: {student_answer?: string; matched_keywords?: string[]; ai_feedback?: string}) => {
     if (!result || question.type !== 'short' || !result.ai_feedback) return null;
+    
+    // Handle answer_key which can be string or string[]
+    const modelAnswer = Array.isArray(question.answer_key) 
+      ? question.answer_key.join(' ') 
+      : question.answer_key || '';
     
     const hintData: HintData = {
       studentAnswer: result.student_answer || '',
-      modelAnswer: question.answer_key || '',
+      modelAnswer: modelAnswer,
       matchedKeywords: result.matched_keywords || [],
       rubricKeywords: question.skill_tags || [],
       linkedLesson: recommendations.length > 0 ? {
@@ -279,9 +285,9 @@ export default function AssignmentResultPage() {
                     </div>
                     {result && question.type === 'mcq' && (
                       <div className={`flex items-center space-x-1 ${
-                        result.is_correct ? 'text-green-600' : 'text-red-600'
+                        result.is_mcq_correct ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {result.is_correct ? (
+                        {result.is_mcq_correct ? (
                           <>
                             <span className="text-sm font-medium">Correct</span>
                           </>
@@ -299,9 +305,13 @@ export default function AssignmentResultPage() {
                 {question.type === 'mcq' && question.options && (
                   <div className="space-y-2 mb-4">
                     {question.options.map((option, optionIndex) => {
-                      const isCorrect = question.answer_key === option;
-                      const isSelected = result && 'is_correct' in result ? 
-                        (result.is_correct && isCorrect) || (!result.is_correct && option === 'selected_answer') : false;
+                      // Handle answer_key which can be string or string[]
+                      const correctAnswers = Array.isArray(question.answer_key) 
+                        ? question.answer_key 
+                        : [question.answer_key];
+                      const isCorrect = correctAnswers.includes(option);
+                      const isSelected = result && result.is_mcq_correct !== undefined ? 
+                        (result.is_mcq_correct && isCorrect) || (!result.is_mcq_correct && option === result.student_answer) : false;
                       
                       return (
                         <div key={optionIndex} className={`p-3 rounded-md border ${
@@ -321,6 +331,7 @@ export default function AssignmentResultPage() {
                               {option}
                             </span>
                             {isCorrect && (
+                              <span className="text-green-600 text-sm">✓</span>
                             )}
                           </div>
                         </div>
@@ -334,7 +345,7 @@ export default function AssignmentResultPage() {
                     <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
                       <div className="text-sm text-gray-600 mb-2">Your Answer:</div>
                       <div className="text-gray-900">
-                        {result && 'answer' in result ? result.answer : 'Answer submitted'}
+                        {result && result.student_answer ? result.student_answer : 'Answer submitted'}
                       </div>
                     </div>
                     
@@ -348,6 +359,7 @@ export default function AssignmentResultPage() {
                               title="How AI Scoring Works"
                               explanation="AI scores are calculated using semantic similarity (70%) and keyword matching (30%). The system compares your answer to the model answer and checks for key concepts. Teachers can review and adjust these scores."
                             >
+                              <span className="text-blue-600 cursor-help">ℹ️</span>
                             </AITooltip>
                           </div>
                           {result.score !== null && result.score !== undefined && (

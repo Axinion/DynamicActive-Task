@@ -9,7 +9,7 @@ import InfoTooltip from '@/components/ui/InfoTooltip';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { getMisconceptions, MisconceptionsResponse, MisconceptionCluster } from '@/lib/api/insights';
 import { getMiniLessons, MiniLessonsResponse } from '@/lib/api/suggestions';
-import { useAuth } from '@/lib/auth';
+import { useAuthStore } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { InsightsLoadingSkeleton } from '@/components/ui/LoadingSkeleton';
@@ -18,7 +18,7 @@ import { TruncatedText } from '@/components/ui/TruncatedText';
 export default function TeacherInsightsPage() {
   const params = useParams();
   const router = useRouter();
-  const { token } = useAuth();
+  const { token } = useAuthStore();
   const classId = parseInt(params.id as string);
 
   const [period, setPeriod] = useState<'week' | 'month'>('week');
@@ -241,7 +241,7 @@ export default function TeacherInsightsPage() {
                                     onClick={() => handleLessonClick(lesson.lesson_id)}
                                     className="text-xs"
                                   >
-                                    📚 {lesson.title}
+                                    {lesson.title}
                                   </Button>
                                 ))}
                               </div>
@@ -259,7 +259,6 @@ export default function TeacherInsightsPage() {
           <EmptyState
             title="Not enough data yet"
             description={`We need more student responses to identify misconceptions. Try again after students have submitted more assignments.`}
-            icon="📊"
           />
         )}
       </Card>

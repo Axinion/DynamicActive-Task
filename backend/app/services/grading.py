@@ -1,12 +1,13 @@
 """
 Grading service for automated short-answer question scoring.
-Provides semantic similarity and keyword coverage analysis.
+Provides semantic similarity and keyword coverage analysis with enhanced AI feedback.
 """
 
 import re
 from typing import List, Dict, Any
 import numpy as np
 from .embeddings import embed_text
+from .falcon_service import generate_feedback, generate_learning_tips
 
 
 def cosine(a: np.ndarray, b: np.ndarray) -> float:
@@ -72,15 +73,20 @@ def keyword_coverage(answer: str, keywords: List[str]) -> float:
 def score_short_answer(
     student_answer: str, 
     model_answer: str, 
-    rubric_keywords: List[str]
+    rubric_keywords: List[str],
+    question_prompt: str = "",
+    use_falcon_feedback: bool = True
 ) -> Dict[str, Any]:
     """
     Score a short answer question using semantic similarity and keyword coverage.
+    Enhanced with Falcon-H1-1B-Base model for better feedback generation.
     
     Args:
         student_answer: Student's submitted answer
         model_answer: Model/expected answer for comparison
         rubric_keywords: List of important keywords from the rubric
+        question_prompt: The original question prompt (optional)
+        use_falcon_feedback: Whether to use Falcon model for enhanced feedback
         
     Returns:
         Dictionary containing:
@@ -88,6 +94,8 @@ def score_short_answer(
         - confidence: Confidence level between 0 and 1
         - explanation: Human-readable explanation
         - matched_keywords: List of keywords found in student answer
+        - enhanced_feedback: AI-generated feedback (if Falcon is used)
+        - learning_tips: Personalized learning suggestions (if Falcon is used)
         
     Example:
         >>> student = "To solve 2x + 3 = 7, I isolate x by subtracting 3 from both sides"
@@ -102,7 +110,13 @@ def score_short_answer(
             "score": 0.0,
             "confidence": 0.0,
             "explanation": "No answer provided.",
-            "matched_keywords": []
+            "matched_keywords": [],
+            "enhanced_feedback": "Please provide an answer to receive feedback.",
+            "learning_tips": {
+                "praise": "We're here to help you learn!",
+                "suggestions": ["Try to answer the question to the best of your ability", "Don't worry about being perfect - just give it your best shot"],
+                "study_tip": "Review the material and try again"
+            }
         }
     
     # Generate embeddings for semantic similarity
@@ -160,12 +174,46 @@ def score_short_answer(
                  f"{'understanding of' if matched_keywords else 'understanding of'} " + \
                  f"{', '.join(matched_keywords) if matched_keywords else 'key concepts'}."
     
-    return {
+    # Enhanced feedback using Falcon model
+    enhanced_feedback = explanation
+    learning_tips = None
+    
+    if use_falcon_feedback:
+        try:
+            # Generate enhanced feedback using Falcon model
+            enhanced_feedback = generate_feedback(
+                student_answer=student_answer,
+                model_answer=model_answer,
+                question_prompt=question_prompt or "Answer the following question",
+                rubric_keywords=rubric_keywords,
+                score=final_score
+            )
+            
+            # Generate learning tips
+            learning_tips = generate_learning_tips(
+                student_answer=student_answer,
+                model_answer=model_answer,
+                skill_tags=rubric_keywords
+            )
+            
+        except Exception as e:
+            print(f"Warning: Falcon feedback generation failed, using fallback: {e}")
+            # Keep the original explanation as fallback
+            enhanced_feedback = explanation
+    
+    result = {
         "score": float(final_score),  # Convert to Python float for JSON serialization
         "confidence": float(confidence),  # Convert to Python float for JSON serialization
         "explanation": explanation,
-        "matched_keywords": matched_keywords
+        "matched_keywords": matched_keywords,
+        "enhanced_feedback": enhanced_feedback
     }
+    
+    # Add learning tips if available
+    if learning_tips:
+        result["learning_tips"] = learning_tips
+    
+    return result
 
 
 def batch_score_short_answers(

@@ -162,7 +162,6 @@ export default function TeacherDashboard() {
           ) : (
             <div className="text-center py-12">
               <EmptyState
-                icon="🏫"
                 title="No classes yet"
                 description="Create your first class to get started with teaching."
                 action={

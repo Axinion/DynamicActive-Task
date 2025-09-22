@@ -1,0 +1,23 @@
+INFO:     Will watch for changes in these directories: ['/Users/mihirpandya/Desktop/code/Tasks/DynamicActive/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [8677] using WatchFiles
+INFO:     Started server process [8707]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/main.py', 'app/api/routes/falcon.py', 'test_falcon_integration.py', 'app/services/grading.py', 'setup_falcon.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [8707]
+WARNING:  WatchFiles detected changes in 'app/middleware/rate_limiting.py', 'tests/test_assignments.py', 'app/api/routes/classes.py', 'tests/conftest.py', 'app/services/falcon_service.py', 'app/api/routes/lessons.py', 'app/api/routes/recommendations.py', 'app/api/routes/assignments.py'. Reloading...
+INFO:     Started server process [11514]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:55672 - "OPTIONS /api/auth/me HTTP/1.1" 200 OK
+2025-09-22 11:58:15,727 - app.middleware.logging - INFO - Request started - ID: f83cdbd7 | Method: GET | Path: /api/auth/me | Client: 127.0.0.1
+2025-09-22 11:58:15,807 - app.core.exceptions - WARNING - HTTP Exception - ID: f83cdbd7 | Status: 401 | Detail: Could not validate credentials
+2025-09-22 11:58:15,812 - app.middleware.logging - INFO - Request completed - ID: f83cdbd7 | Status: 401 | Latency: 0.084s
+INFO:     127.0.0.1:55672 - "GET /api/auth/me HTTP/1.1" 401 Unauthorized
+2025-09-22 11:58:24,505 - app.middleware.logging - INFO - Request started - ID: 5e5608fe | Method: GET | Path: /api/health | Client: 127.0.0.1
+2025-09-22 11:58:24,507 - app.middleware.logging - INFO - Request completed - ID: 5e5608fe | Status: 200 | Latency: 0.003s
+INFO:     127.0.0.1:55686 - "GET /api/health HTTP/1.1" 200 OK

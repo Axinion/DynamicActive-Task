@@ -40,12 +40,19 @@ app.dependency_overrides[get_db] = override_get_db
 @pytest.fixture(scope="function")
 def db():
     """Create a fresh database for each test."""
+    # Drop all tables first to ensure clean state
+    Base.metadata.drop_all(bind=engine)
+    # Create all tables
     Base.metadata.create_all(bind=engine)
     yield TestingSessionLocal()
+    # Clean up after test
     Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture(scope="function")
 def client():
     """Create a test client."""
-    return TestClient(app)
+    client = TestClient(app)
+    # Mark as testing environment to skip rate limiting
+    client.app.state.testing = True
+    return client

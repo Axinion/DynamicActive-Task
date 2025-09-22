@@ -80,13 +80,14 @@ export default function StudentDashboard() {
       setError('');
       const response = await joinClass({ invite_code: inviteCode.trim() }, token || undefined);
       
-      if (response.data?.success) {
+      if (response?.success) {
         setToast({ message: 'Joined!', type: 'success' });
         setInviteCode(''); // Clear the input
         await fetchClasses(); // Refresh the list
-      } else if (response.error) {
-        setError(response.error);
-        setToast({ message: response.error, type: 'error' });
+      } else {
+        const msg = response?.message || 'Failed to join class';
+        setError(msg);
+        setToast({ message: msg, type: 'error' });
       }
     } catch (error) {
       console.error('Failed to join class:', error);
@@ -230,7 +231,6 @@ export default function StudentDashboard() {
             ) : (
               <div className="text-center py-12">
                 <EmptyState
-                  icon="🏫"
                   title="No classes yet"
                   description="Use the form above to join a class with an invite code."
                 />

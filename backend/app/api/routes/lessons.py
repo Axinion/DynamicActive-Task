@@ -42,6 +42,7 @@ async def create_lesson(
     return LessonRead.model_validate(new_lesson)
 
 
+@router.get("", response_model=List[LessonWithClass])
 @router.get("/", response_model=List[LessonWithClass])
 async def get_lessons(
     class_id: int = Query(..., description="Class ID is required"),

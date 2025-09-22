@@ -79,7 +79,7 @@ def get_low_scoring_responses(class_id: int, db: Session, period: str = "week") 
         else:  # short answer
             # For short answer, check if score is below threshold
             score = response.teacher_score if response.teacher_score is not None else response.ai_score
-            if score is not None and score < settings.short_answer_pass_threshold:
+            if score is not None and score < settings.SHORT_ANSWER_PASS_THRESHOLD:
                 include_response = True
         
         if include_response:
@@ -314,9 +314,9 @@ def get_misconception_insights(class_id: int, db: Session, period: str = "week")
         },
         'total_items': len(low_scoring_responses),
         'clusters': clusters,
-        'analysis_summary': {
-            'total_clusters': len(clusters),
-            'threshold_used': settings.short_answer_pass_threshold,
-            'analysis_type': 'KMeans clustering on response embeddings'
-        }
+            'analysis_summary': {
+                'total_clusters': len(clusters),
+                'threshold_used': settings.SHORT_ANSWER_PASS_THRESHOLD,
+                'analysis_type': 'KMeans clustering on response embeddings'
+            }
     }

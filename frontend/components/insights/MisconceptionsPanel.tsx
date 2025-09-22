@@ -29,7 +29,7 @@ export default function MisconceptionsPanel({ classId, className = '' }: Misconc
       try {
         setIsLoading(true);
         setError(null);
-        const response = await getMisconceptions({ classId }, token);
+        const response = await getMisconceptions({ classId, period: 'week' }, token);
         setClusters(response.clusters || []);
         setTotalResponses(response.total_responses || 0);
         setAnalyzedResponses(response.analyzed_responses || 0);

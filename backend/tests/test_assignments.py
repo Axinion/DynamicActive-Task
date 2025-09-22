@@ -82,7 +82,7 @@ def setup_test_data():
         db.close()
 
 
-def get_auth_token(email: str, password: str) -> str:
+def get_auth_token(client, email: str, password: str) -> str:
     """Get authentication token for a user."""
     response = client.post("/api/auth/login", json={
         "email": email,
@@ -92,12 +92,12 @@ def get_auth_token(email: str, password: str) -> str:
     return response.json()["access_token"]
 
 
-def test_create_assignment_teacher_only():
+def test_create_assignment_teacher_only(client, db):
     """Test that only teachers can create assignments."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Student tries to create an assignment
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     headers = {"Authorization": f"Bearer {student_token}"}
     
     assignment_data = {
@@ -120,9 +120,9 @@ def test_create_assignment_teacher_only():
     assert "Only teachers can create assignments" in response.json()["detail"]
 
 
-def test_create_assignment_teacher_owns_class():
+def test_create_assignment_teacher_owns_class(client, db):
     """Test that teachers can only create assignments for classes they own."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create another teacher and class
     db = SessionLocal()
@@ -150,7 +150,7 @@ def test_create_assignment_teacher_owns_class():
         db.close()
     
     # First teacher tries to create assignment in other teacher's class
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -165,11 +165,11 @@ def test_create_assignment_teacher_owns_class():
     assert "Class not found or access denied" in response.json()["detail"]
 
 
-def test_create_assignment_success():
+def test_create_assignment_success(client, db):
     """Test successful assignment creation by teacher."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -208,11 +208,11 @@ def test_create_assignment_success():
     assert created_assignment["id"] is not None
 
 
-def test_get_assignments_requires_class_id():
+def test_get_assignments_requires_class_id(client, db):
     """Test that GET /api/assignments requires class_id parameter."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     headers = {"Authorization": f"Bearer {teacher_token}"}
     
     # Try to get assignments without class_id
@@ -220,12 +220,12 @@ def test_get_assignments_requires_class_id():
     assert response.status_code == 422  # Validation error
 
 
-def test_get_assignments_teacher_access():
+def test_get_assignments_teacher_access(client, db):
     """Test that teachers can get assignments from their classes."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -255,12 +255,12 @@ def test_get_assignments_teacher_access():
     assert assignments[0]["title"] == "Test Assignment"
 
 
-def test_get_assignments_student_access():
+def test_get_assignments_student_access(client, db):
     """Test that students can get assignments from classes they're enrolled in."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -280,7 +280,7 @@ def test_get_assignments_student_access():
     assert create_response.status_code == 200
     
     # Student gets assignments
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     student_headers = {"Authorization": f"Bearer {student_token}"}
     
     response = client.get(f"/api/assignments?class_id={test_class_id}", headers=student_headers)
@@ -291,12 +291,12 @@ def test_get_assignments_student_access():
     assert assignments[0]["title"] == "Student Assignment"
 
 
-def test_get_assignment_by_id():
+def test_get_assignment_by_id(client, db):
     """Test getting a specific assignment by ID."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -328,12 +328,12 @@ def test_get_assignment_by_id():
     assert len(assignment["questions"]) == 1
 
 
-def test_submit_assignment_student_only():
+def test_submit_assignment_student_only(client, db):
     """Test that only students can submit assignments."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -367,12 +367,12 @@ def test_submit_assignment_student_only():
     assert "Only students can submit assignments" in response.json()["detail"]
 
 
-def test_submit_assignment_success():
+def test_submit_assignment_success(client, db):
     """Test successful assignment submission by student."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -401,7 +401,7 @@ def test_submit_assignment_success():
     questions = create_response.json()["questions"]
     
     # Student submits assignment
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     student_headers = {"Authorization": f"Bearer {student_token}"}
     
     submission_data = {
@@ -431,12 +431,12 @@ def test_submit_assignment_success():
     assert breakdown[1]["score"] is None
 
 
-def test_submit_assignment_wrong_answer():
+def test_submit_assignment_wrong_answer(client, db):
     """Test assignment submission with wrong MCQ answer."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -460,7 +460,7 @@ def test_submit_assignment_wrong_answer():
     question_id = create_response.json()["questions"][0]["id"]
     
     # Student submits wrong answer
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     student_headers = {"Authorization": f"Bearer {student_token}"}
     
     submission_data = {
@@ -481,12 +481,12 @@ def test_submit_assignment_wrong_answer():
     assert breakdown[0]["score"] == 0.0
 
 
-def test_submit_assignment_already_submitted():
+def test_submit_assignment_already_submitted(client, db):
     """Test that students cannot submit the same assignment twice."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create an assignment first
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -510,7 +510,7 @@ def test_submit_assignment_already_submitted():
     question_id = create_response.json()["questions"][0]["id"]
     
     # Student submits assignment
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     student_headers = {"Authorization": f"Bearer {student_token}"}
     
     submission_data = {
@@ -529,9 +529,9 @@ def test_submit_assignment_already_submitted():
     assert "Assignment already submitted" in response2.json()["detail"]
 
 
-def test_submit_assignment_not_enrolled():
+def test_submit_assignment_not_enrolled(client, db):
     """Test that students cannot submit assignments for classes they're not enrolled in."""
-    teacher_id, student_id, test_class_id = setup_test_data()
+    teacher_id, student_id, test_class_id = setup_test_data(db)
     
     # Create another class that student is not enrolled in
     db = SessionLocal()
@@ -549,7 +549,7 @@ def test_submit_assignment_not_enrolled():
         db.close()
     
     # Create assignment in other class
-    teacher_token = get_auth_token("test_teacher@example.com", "testpass")
+    teacher_token = get_auth_token(client, "test_teacher@example.com", "testpass")
     teacher_headers = {"Authorization": f"Bearer {teacher_token}"}
     
     assignment_data = {
@@ -573,7 +573,7 @@ def test_submit_assignment_not_enrolled():
     question_id = create_response.json()["questions"][0]["id"]
     
     # Student tries to submit assignment from class they're not enrolled in
-    student_token = get_auth_token("test_student@example.com", "testpass")
+    student_token = get_auth_token(client, "test_student@example.com", "testpass")
     student_headers = {"Authorization": f"Bearer {student_token}"}
     
     submission_data = {

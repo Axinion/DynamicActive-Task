@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .db.session import create_tables
-from .api.routes import auth, classes, lessons, assignments, grading, recommendations, gradebook, insights, progress, suggestions, version
+from .api.routes import auth, classes, lessons, assignments, grading, recommendations, gradebook, insights, progress, suggestions, version, falcon
 from .middleware.logging import LoggingMiddleware
 from .middleware.rate_limiting import RateLimitMiddleware
 from .core.exceptions import setup_exception_handlers
@@ -43,6 +43,7 @@ app.include_router(gradebook.router, prefix="/api/gradebook", tags=["gradebook"]
 app.include_router(insights.router, prefix="/api/insights", tags=["insights"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(suggestions.router, prefix="/api/suggestions", tags=["suggestions"])
+app.include_router(falcon.router, prefix="/api/falcon", tags=["falcon-ai"])
 app.include_router(version.router, prefix="/api", tags=["version"])
 
 

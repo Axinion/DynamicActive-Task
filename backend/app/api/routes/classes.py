@@ -13,6 +13,7 @@ from ...services.invite import generate_invite_code
 router = APIRouter()
 
 
+@router.post("", response_model=ClassResponse)
 @router.post("/", response_model=ClassResponse)
 async def create_class(
     class_data: ClassCreate,
@@ -42,6 +43,7 @@ async def create_class(
     return ClassResponse.model_validate(new_class)
 
 
+@router.get("", response_model=List[ClassWithDetails])
 @router.get("/", response_model=List[ClassWithDetails])
 async def get_classes(
     current_user: dict = Depends(get_current_user),

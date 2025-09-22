@@ -22,7 +22,7 @@ export default function Home() {
           <Card className="text-center hover:shadow-2xl transition-all duration-300 border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:scale-105">
             <CardHeader className="pb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <span className="text-xl">👨‍🏫</span>
+                <span className="text-xl"></span>
               </div>
               <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">I&apos;m a Teacher</CardTitle>
             </CardHeader>

@@ -1,0 +1,22 @@
+
+> k12-lms-frontend@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.2
+   - Local:        http://localhost:3000
+   - Network:      http://11.34.107.165:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1297ms
+ ○ Compiling / ...
+ ✓ Compiled / in 750ms (661 modules)
+🔧 Frontend Configuration:
+  Environment: development
+  API Base: http://localhost:8000/api
+  Public Environment: development
+ GET / 200 in 1080ms
+ GET / 200 in 97ms
+ ✓ Compiled in 369ms (416 modules)
+ ✓ Compiled in 94ms (416 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/mihirpandya/Desktop/code/Tasks/DynamicActive/frontend/.next/cache/webpack/server-development/5.pack.gz_' -> '/Users/mihirpandya/Desktop/code/Tasks/DynamicActive/frontend/.next/cache/webpack/server-development/5.pack.gz'

@@ -64,6 +64,7 @@ async def create_assignment(
     return AssignmentRead.model_validate(new_assignment)
 
 
+@router.get("", response_model=List[AssignmentRead])
 @router.get("/", response_model=List[AssignmentRead])
 async def get_assignments(
     class_id: int = Query(..., description="Class ID is required"),
@@ -151,7 +152,11 @@ async def submit_assignment(
     ).first()
     
     if existing_submission:
-        raise HTTPException(status_code=400, detail="Assignment already submitted")
+        # If already submitted, return the existing submission to allow clients to redirect
+        return SubmissionResponse(
+            submission=SubmissionRead.model_validate(existing_submission),
+            breakdown=[]
+        )
     
     # Create submission
     submission = Submission(
@@ -235,29 +240,39 @@ async def submit_assignment(
                 rubric_keywords = question.skill_tags if question.skill_tags else []
                 
                 if model_answer and rubric_keywords:
-                    # Use AI grading service
+                    # Use enhanced AI grading service with Falcon model
                     grading_result = score_short_answer(
                         student_answer=str(student_answer),
                         model_answer=model_answer,
-                        rubric_keywords=rubric_keywords
+                        rubric_keywords=rubric_keywords,
+                        question_prompt=question.prompt,
+                        use_falcon_feedback=True
                     )
                     
                     # Convert score from 0-1 to 0-100 scale
                     response.ai_score = grading_result["score"] * 100.0
-                    response.ai_feedback = grading_result["explanation"]
+                    # Use enhanced feedback if available, otherwise fallback to explanation
+                    response.ai_feedback = grading_result.get("enhanced_feedback", grading_result["explanation"])
                     response.matched_keywords = grading_result["matched_keywords"]
                     
                     total_score += response.ai_score
                     scored_questions += 1
                     
-                    breakdown.append({
+                    # Prepare breakdown with enhanced feedback
+                    breakdown_item = {
                         "question_id": question_id,
                         "type": "short",
                         "score": response.ai_score,
                         "ai_feedback": response.ai_feedback,
                         "matched_keywords": response.matched_keywords,
                         "is_mcq_correct": None
-                    })
+                    }
+                    
+                    # Add learning tips if available
+                    if "learning_tips" in grading_result:
+                        breakdown_item["learning_tips"] = grading_result["learning_tips"]
+                    
+                    breakdown.append(breakdown_item)
                 else:
                     # Missing model answer or rubric
                     response.ai_score = None

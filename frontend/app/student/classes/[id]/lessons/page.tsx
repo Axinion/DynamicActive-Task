@@ -79,9 +79,7 @@ export default function StudentLessonsPage() {
         ) : error ? (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
-              <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <span className="h-5 w-5 inline-block" />
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">Error loading lessons</h3>
                 <p className="text-sm text-red-700 mt-1">{error}</p>
@@ -111,9 +109,7 @@ export default function StudentLessonsPage() {
                       
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex items-center space-x-2">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
+                          <span className="w-4 h-4 inline-block" />
                           <span>Created {formatDate(lesson.created_at)}</span>
                         </div>
                         
